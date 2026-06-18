@@ -11,7 +11,7 @@
     <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fuentes de Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome para Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -63,7 +63,7 @@
                 </div>
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nombre de Usuario o Correo</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Usuario o Correo</label>
                         <input id="loginUser" type="text" placeholder="celador o admin" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div>
@@ -91,7 +91,7 @@
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Tipo de Vehículo</label>
                         <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-emerald-500 bg-emerald-50 text-emerald-700" id="labelCarro">
+                            <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold" id="labelCarro">
                                 <input type="radio" name="tipoVehiculo" value="Carro" checked class="hidden" onchange="toggleVehicleType('Carro')">
                                 <i class="fa-solid fa-car text-lg mr-2"></i> Carro
                             </label>
@@ -233,12 +233,12 @@
                 </h3>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label for="tarifaCarro" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Carro</label>
-                        <input id="tarifaCarro" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <label for="tarifaCarro" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Carro (COP)</label>
+                        <input id="tarifaCarro" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
                     </div>
                     <div>
-                        <label for="tarifaMoto" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Moto</label>
-                        <input id="tarifaMoto" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <label for="tarifaMoto" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Moto (COP)</label>
+                        <input id="tarifaMoto" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
                     </div>
                 </div>
                 <button onclick="guardarConfiguracion()" class="w-full py-3 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl transition">
@@ -246,27 +246,45 @@
                 </button>
             </div>
 
-            <!-- Sección Servidor de Reportes y Webhooks -->
+            <!-- Sección Servidor de Reportes e Integración (Conexiones Internas Protegidas) -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-envelope text-emerald-600"></i> Envíos y Automatización (n8n + Google Sheets)
+                    <i class="fa-solid fa-envelope text-emerald-600"></i> Servidor de Reportes e Integración
                 </h3>
                 <div class="space-y-3">
                     <div>
-                        <label for="correoDestino" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Correo de Reportes</label>
+                        <label for="correoDestino" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Correo para Envío de Reportes</label>
                         <input id="correoDestino" type="email" placeholder="admin@conjunto.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <hr class="border-slate-100 my-2">
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Configuración de Flujos n8n</p>
-                    <div>
-                        <label for="webhookUrl" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Webhook de Escritura (Eventos / Push)</label>
-                        <input id="webhookUrl" type="url" placeholder="https://tu-n8n.com/webhook/control-parqueadero-push" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs">
-                        <span class="text-[10px] text-slate-400">Envía eventos en tiempo real: nuevo ingreso, salida, creación de celador, etc.</span>
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 space-y-1">
+                        <p class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> Canales de Sincronización Protegidos
+                        </p>
+                        <p class="text-[11px] text-emerald-600 leading-relaxed">
+                            Las conexiones API con los flujos de n8n para Google Sheets se encuentran integradas a nivel de código.
+                        </p>
                     </div>
-                    <div>
-                        <label for="webhookUrlPull" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Webhook de Lectura (Sincronización / Pull)</label>
-                        <input id="webhookUrlPull" type="url" placeholder="https://tu-n8n.com/webhook/control-parqueadero-pull" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs">
-                        <span class="text-[10px] text-slate-400">Trae las tarifas, celadores y carros activos guardados en Google Sheets.</span>
+
+                    <!-- Diagnóstico CORS de n8n -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 mt-2" id="corsHelperBlock">
+                        <p class="text-xs font-bold text-amber-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> ¿Aparece la app "Offline"? (CORS en n8n)
+                        </p>
+                        <p class="text-[11px] text-amber-700 leading-relaxed">
+                            Si se produce un error de conexión, es porque tu navegador bloquea la petición por políticas de seguridad <strong>CORS</strong>. Configura tus Webhooks de n8n de la siguiente forma para resolverlo:
+                        </p>
+                        <ol class="text-[10px] text-amber-700 list-decimal pl-4 space-y-1">
+                            <li>En el nodo <strong>Webhook</strong> de entrada, cambia <em>Response Mode</em> a <strong>"Response to Webhook"</strong>.</li>
+                            <li>Añade un nodo <strong>Respond to Webhook</strong> al final del flujo.</li>
+                            <li>En ese nodo, agrega las siguientes cabeceras (Headers):
+                                <ul class="list-disc pl-3 mt-1 font-mono text-[9px] bg-white p-1.5 rounded border border-amber-150 space-y-0.5">
+                                    <li><strong>Access-Control-Allow-Origin:</strong> *</li>
+                                    <li><strong>Access-Control-Allow-Methods:</strong> GET, POST, OPTIONS</li>
+                                    <li><strong>Access-Control-Allow-Headers:</strong> Content-Type, Accept</li>
+                                </ul>
+                            </li>
+                        </ol>
                     </div>
                 </div>
                 <div class="flex gap-2 pt-2">
@@ -282,22 +300,51 @@
             <!-- Sección Gestión de Celadores -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-users text-emerald-600"></i> Gestión de Celadores
+                    <i class="fa-solid fa-users text-emerald-600"></i> Gestión de Personal
                 </h3>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-3">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Registrar Nuevo Celador</h4>
-                    <div class="space-y-2">
-                        <input id="nuevoCeladorUser" type="text" placeholder="Usuario celador" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none">
-                        <input id="nuevoCeladorPass" type="password" placeholder="Contraseña" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none">
-                        <button onclick="crearCelador()" class="w-full py-2 bg-emerald-600 text-white text-sm font-bold rounded-lg transition hover:bg-emerald-700">
-                            Agregar Celador
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Registrar Nuevo Personal</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre Completo</label>
+                            <input id="nuevoCeladorName" type="text" placeholder="Ej. Juan Pérez" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Usuario (Acceso)</label>
+                                <input id="nuevoCeladorUser" type="text" placeholder="juan.perez" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Contraseña</label>
+                                <input id="nuevoCeladorPass" type="password" placeholder="••••" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Teléfono</label>
+                                <input id="nuevoCeladorPhone" type="tel" placeholder="3001234567" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Rol</label>
+                                <select id="nuevoCeladorRol" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                    <option value="Celador">Celador</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Correo Electrónico</label>
+                            <input id="nuevoCeladorEmail" type="email" placeholder="juan@conjunto.com" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <button onclick="crearCelador()" class="w-full py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg transition hover:bg-emerald-700 shadow shadow-emerald-600/20">
+                            Agregar Personal
                         </button>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Celadores Activos</h4>
-                    <ul id="listaCeladores" class="divide-y divide-slate-100">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Personal Registrado</h4>
+                    <ul id="listaCeladores" class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
                         <!-- Lista dinámica -->
                     </ul>
                 </div>
@@ -328,6 +375,10 @@
     </nav>
 
     <script>
+        // --- WEBHOOKS INTEGRADOS Y PROTEGIDOS EN EL CÓDIGO ---
+        const WEBHOOK_PUSH_URL = 'https://n8n.srv1333424.hstgr.cloud/webhook/procesar-accion';
+        const WEBHOOK_PULL_URL = 'https://n8n.srv1333424.hstgr.cloud/webhook/obtener-datos';
+
         // --- VARIABLES DE ESTADO LOCAL (Respaldo Offline) ---
         let db = {
             usuarios: [],
@@ -335,9 +386,7 @@
             config: {
                 tarifaCarro: 3000, 
                 tarifaMoto: 1500,
-                correoDestino: 'admin@conjunto.com',
-                webhookUrl: '',      // Webhook Push (Escritura de eventos)
-                webhookUrlPull: ''   // Webhook Pull (Carga inicial desde Sheets)
+                correoDestino: 'admin@conjunto.com'
             }
         };
 
@@ -355,7 +404,7 @@
             toast.className = `${bgClass} text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transition-all transform translate-y-4 opacity-0 mb-2 pointer-events-auto w-full`;
             toast.innerHTML = `
                 <i class="fa-solid ${iconClass} text-lg"></i>
-                <span class="flex-1">${message}</span>
+                <span class="flex-1 text-xs">${message}</span>
             `;
 
             container.appendChild(toast);
@@ -376,11 +425,22 @@
             const localData = localStorage.getItem('park_db');
             if (localData) {
                 db = JSON.parse(localData);
+                // Migración automática de usuarios antiguos (si existen de versiones previas)
+                if (db.usuarios && db.usuarios.length > 0 && !db.usuarios[0].username) {
+                    db.usuarios = db.usuarios.map(u => ({
+                        name: u.name || 'Portero General',
+                        username: u.email || 'celador_legacy',
+                        email: u.email && u.email.includes('@') ? u.email : 'celador@conjunto.com',
+                        phone: '3000000000',
+                        rol: u.rol || 'Celador',
+                        pass: u.pass || '1234'
+                    }));
+                }
             } else {
-                // Usuarios base por defecto si la base de datos está totalmente vacía
+                // Usuarios base por defecto con la estructura de datos completa
                 db.usuarios = [
-                    { email: 'admin', pass: 'admin', rol: 'Administrador', name: 'Administrador General' },
-                    { email: 'celador', pass: '1234', rol: 'Celador', name: 'Portería Principal' }
+                    { name: 'Administrador General', username: 'admin', email: 'admin@conjunto.com', phone: '3001234567', rol: 'Administrador', pass: 'admin' },
+                    { name: 'Portería Principal', username: 'celador', email: 'porteria@conjunto.com', phone: '3007654321', rol: 'Celador', pass: '1234' }
                 ];
                 saveDb();
             }
@@ -394,15 +454,9 @@
             document.getElementById('tarifaCarro').value = db.config.tarifaCarro;
             document.getElementById('tarifaMoto').value = db.config.tarifaMoto;
             document.getElementById('correoDestino').value = db.config.correoDestino || 'admin@conjunto.com';
-            document.getElementById('webhookUrl').value = db.config.webhookUrl || '';
-            document.getElementById('webhookUrlPull').value = db.config.webhookUrlPull || '';
 
-            // Intentar sincronización automática con Google Sheets al iniciar
-            if (db.config.webhookUrlPull) {
-                await pullFromCloud();
-            } else {
-                actualizarBadgeSincronizacion(false);
-            }
+            // Sincronización automática de arranque con Google Sheets
+            await pullFromCloud();
         };
 
         function saveDb() {
@@ -411,17 +465,23 @@
 
         // --- SINCRONIZACIÓN CON GOOGLE SHEETS (VÍA n8n) ---
         
-        // 1. Obtener datos desde Google Sheets (PULL)
+        // 1. Obtener datos desde Google Sheets (PULL) con protección de CORS y Timeout
         async function pullFromCloud() {
-            if (!db.config.webhookUrlPull) return;
-            
             actualizarBadgeSincronizacion(true, "Cargando...");
+            let timeoutId;
             
             try {
-                const response = await fetch(db.config.webhookUrlPull, {
+                // Previene que peticiones de red colgadas congelen la inicialización de la app
+                const controller = new AbortController();
+                timeoutId = setTimeout(() => controller.abort(), 6500); 
+
+                const response = await fetch(WEBHOOK_PULL_URL, {
                     method: 'GET',
-                    headers: { 'Accept': 'application/json' }
+                    signal: controller.signal
+                    // No incluimos cabeceras personalizadas de forma predeterminada para evitar inspección previa (CORS preflight OPTIONS)
                 });
+                
+                clearTimeout(timeoutId);
                 
                 if (response.ok) {
                     const cloudData = await response.json();
@@ -429,10 +489,9 @@
                     // Validar la estructura mínima devuelta por n8n desde el Google Sheet
                     if (cloudData.usuarios || cloudData.registros || cloudData.config) {
                         if (cloudData.usuarios && Array.isArray(cloudData.usuarios)) {
-                            // Mantener al menos el admin por defecto por seguridad si la hoja está vacía
                             if (cloudData.usuarios.length === 0) {
                                 cloudData.usuarios = [
-                                    { email: 'admin', pass: 'admin', rol: 'Administrador', name: 'Administrador General' }
+                                    { name: 'Administrador General', username: 'admin', email: 'admin@conjunto.com', phone: '3001234567', rol: 'Administrador', pass: 'admin' }
                                 ];
                             }
                             db.usuarios = cloudData.usuarios;
@@ -441,9 +500,11 @@
                             db.registros = cloudData.registros;
                         }
                         if (cloudData.config) {
-                            db.config = { ...db.config, ...cloudData.config };
+                            db.config.tarifaCarro = cloudData.config.tarifaCarro || db.config.tarifaCarro;
+                            db.config.tarifaMoto = cloudData.config.tarifaMoto || db.config.tarifaMoto;
+                            db.config.correoDestino = cloudData.config.correoDestino || db.config.correoDestino;
                             
-                            // Actualizar inputs del admin si están cargados
+                            // Actualizar inputs del admin
                             if (document.getElementById('tarifaCarro')) {
                                 document.getElementById('tarifaCarro').value = db.config.tarifaCarro;
                                 document.getElementById('tarifaMoto').value = db.config.tarifaMoto;
@@ -465,31 +526,28 @@
                     showToast("No se pudo obtener datos del servidor. Usando datos locales.", "error");
                 }
             } catch (err) {
-                console.error("Error al sincronizar con la nube:", err);
+                if (timeoutId) clearTimeout(timeoutId);
+                // Manejo silencioso y preventivo del error CORS para no romper el entorno local del navegador
+                console.warn("La sincronización de n8n requiere configuración de cabeceras CORS:", err);
                 actualizarBadgeSincronizacion(false, "Offline");
-                showToast("Fallo de conexión. Trabajando en modo local.", "info");
+                showToast("Sincronización de n8n no disponible. Usando respaldo de base local.", "info");
             }
         }
 
         // 2. Enviar evento en tiempo real a Google Sheets (PUSH)
         async function pushToCloud(actionType, actionData) {
-            if (!db.config.webhookUrl) {
-                console.log("No hay webhook configurado para enviar el evento:", actionType);
-                return false;
-            }
-
             try {
                 const payload = {
                     action: actionType,
                     data: actionData,
                     meta: {
                         fecha: new Date().toISOString(),
-                        usuarioOperador: activeUser ? activeUser.email : 'anonimo',
+                        usuarioOperador: activeUser ? (activeUser.username || activeUser.email) : 'anonimo',
                         correoDestino: db.config.correoDestino
                     }
                 };
 
-                const response = await fetch(db.config.webhookUrl, {
+                const response = await fetch(WEBHOOK_PUSH_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -503,8 +561,29 @@
                     return false;
                 }
             } catch (err) {
-                console.error("Error al transmitir datos a n8n:", err);
+                console.error("Error al transmitir datos a n8n (Verificar CORS en n8n):", err);
                 return false;
+            }
+        }
+
+        // 3. Auditoría de Turnos (Entrada/Salida de Celador)
+        async function registrarTurnoCelador(actionType, user) {
+            const shiftRecord = {
+                id: 'SHIFT-' + Date.now(),
+                username: user.username,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                rol: user.rol,
+                timestamp: new Date().toISOString(),
+                evento: actionType === 'INGRESO_TURNO' ? 'Entrada Turno' : 'Salida Turno'
+            };
+
+            const pushExitoso = await pushToCloud(actionType, shiftRecord);
+            if (pushExitoso) {
+                console.log(`Turno (${actionType}) enviado a Google Sheets.`);
+            } else {
+                console.warn(`No se pudo sincronizar el turno (${actionType}) en tiempo real.`);
             }
         }
 
@@ -522,10 +601,6 @@
         }
 
         async function forzarSincronizacion() {
-            if (!db.config.webhookUrlPull) {
-                showToast("Por favor configure la URL de Webhook de Lectura en el panel Admin para sincronizar con Google Sheets.", "error");
-                return;
-            }
             await pullFromCloud();
         }
 
@@ -621,15 +696,21 @@
             const userIn = document.getElementById('loginUser').value.trim();
             const passIn = document.getElementById('loginPassword').value.trim();
 
-            const user = db.usuarios.find(u => u.email.toLowerCase() === userIn.toLowerCase() && u.pass === passIn);
+            const user = db.usuarios.find(u => 
+                (u.username && u.username.toLowerCase() === userIn.toLowerCase()) || 
+                (u.email && u.email.toLowerCase() === userIn.toLowerCase())
+            );
 
-            if (user) {
+            if (user && user.pass === passIn) {
                 activeUser = user;
                 sessionStorage.setItem('park_session', JSON.stringify(user));
                 document.getElementById('loginSection').classList.add('hidden');
                 updateNavbarForRole();
                 showToast(`¡Bienvenido, ${user.name}!`);
                 
+                // Registro de auditoría del inicio del turno
+                registrarTurnoCelador('INGRESO_TURNO', user);
+
                 document.getElementById('loginUser').value = '';
                 document.getElementById('loginPassword').value = '';
             } else {
@@ -638,6 +719,10 @@
         }
 
         function logout() {
+            if (activeUser) {
+                // Registro de auditoría de salida del turno
+                registrarTurnoCelador('SALIDA_TURNO', activeUser);
+            }
             sessionStorage.removeItem('park_session');
             activeUser = null;
             document.getElementById('loginSection').classList.remove('hidden');
@@ -898,8 +983,6 @@
             const tc = parseInt(document.getElementById('tarifaCarro').value);
             const tm = parseInt(document.getElementById('tarifaMoto').value);
             const correo = document.getElementById('correoDestino').value.trim();
-            const webhook = document.getElementById('webhookUrl').value.trim();
-            const webhookPull = document.getElementById('webhookUrlPull').value.trim();
 
             if (isNaN(tc) || isNaN(tm) || !correo) {
                 showToast('Complete todos los campos del panel de administración.', 'error');
@@ -909,8 +992,6 @@
             db.config.tarifaCarro = tc;
             db.config.tarifaMoto = tm;
             db.config.correoDestino = correo;
-            db.config.webhookUrl = webhook;
-            db.config.webhookUrlPull = webhookPull;
 
             saveDb();
             showToast('Tarifas locales actualizadas.');
@@ -927,70 +1008,85 @@
         }
 
         async function crearCelador() {
-            const userIn = document.getElementById('nuevoCeladorUser').value.trim();
-            const passIn = document.getElementById('nuevoCeladorPass').value.trim();
+            const name = document.getElementById('nuevoCeladorName').value.trim();
+            const username = document.getElementById('nuevoCeladorUser').value.trim();
+            const pass = document.getElementById('nuevoCeladorPass').value.trim();
+            const phone = document.getElementById('nuevoCeladorPhone').value.trim();
+            const rol = document.getElementById('nuevoCeladorRol').value;
+            const email = document.getElementById('nuevoCeladorEmail').value.trim();
 
-            if (!userIn || !passIn) {
-                showToast('Complete usuario y contraseña del nuevo celador.', 'error');
+            if (!name || !username || !pass || !phone || !email) {
+                showToast('Debe completar todos los campos del nuevo usuario.', 'error');
                 return;
             }
 
-            const existe = db.usuarios.some(u => u.email.toLowerCase() === userIn.toLowerCase());
+            const existe = db.usuarios.some(u => u.username.toLowerCase() === username.toLowerCase());
             if (existe) {
-                showToast('El usuario ingresado ya existe.', 'error');
+                showToast('El nombre de usuario ya se encuentra registrado.', 'error');
                 return;
             }
 
-            const nuevoCelador = {
-                email: userIn,
-                pass: passIn,
-                rol: 'Celador',
-                name: 'Celador - ' + userIn
+            const nuevoUsuario = {
+                name,
+                username,
+                pass,
+                phone,
+                rol,
+                email
             };
 
-            db.usuarios.push(nuevoCelador);
+            db.usuarios.push(nuevoUsuario);
             saveDb();
             renderCeladoresList();
             
+            // Limpiar inputs
+            document.getElementById('nuevoCeladorName').value = '';
             document.getElementById('nuevoCeladorUser').value = '';
             document.getElementById('nuevoCeladorPass').value = '';
+            document.getElementById('nuevoCeladorPhone').value = '';
+            document.getElementById('nuevoCeladorEmail').value = '';
 
-            showToast('Sincronizando nuevo celador...');
+            showToast('Sincronizando nuevo usuario...');
             
-            // Sincronizar celadores a Google Sheets mediante evento en n8n
-            const pushExitoso = await pushToCloud('CREAR_CELADOR', {
+            // Sincronizar usuario a Google Sheets mediante evento en n8n
+            const pushExitoso = await pushToCloud('CREAR_USUARIO', {
                 usuariosActualizados: db.usuarios,
-                usuarioCreado: nuevoCelador
+                usuarioCreado: nuevoUsuario
             });
 
             if (pushExitoso) {
-                showToast('Celador registrado en la base de datos central de Google Sheets.');
+                showToast('Usuario registrado en la base de datos central de Google Sheets.');
             } else {
                 showToast('Agregado localmente. Guardado en cola de sincronización.', 'info');
             }
         }
 
-        async function eliminarUsuario(email) {
-            if (email === 'admin' || email === 'celador') {
-                showToast('No se pueden eliminar las cuentas maestro del sistema.', 'error');
+        async function eliminarUsuario(username) {
+            if (username === 'admin' || username === 'celador') {
+                showToast('No se pueden eliminar las cuentas maestro de demostración.', 'error');
                 return;
             }
 
-            db.usuarios = db.usuarios.filter(u => u.email !== email);
+            if (activeUser && activeUser.username === username) {
+                showToast('No puedes eliminar el usuario con el que tienes sesión activa.', 'error');
+                return;
+            }
+
+            db.usuarios = db.usuarios.filter(u => u.username !== username);
             saveDb();
             renderCeladoresList();
-            showToast('Eliminando celador centralmente...');
+            showToast('Eliminando usuario centralmente...');
 
             // Sincronizar la eliminación del celador con Google Sheets
-            const pushExitoso = await pushToCloud('ELIMINAR_CELADOR', {
+            const pushExitoso = await pushToCloud('ELIMINAR_USUARIO', {
                 usuariosActualizados: db.usuarios,
-                usuarioEliminadoEmail: email
+                usuarioEliminadoUsername: username
             });
 
             if (pushExitoso) {
-                showToast('Celador removido de Google Sheets con éxito.');
+                showToast('Usuario removido de Google Sheets con éxito.');
             } else {
-                showToast('Celador removido localmente.', 'info');
+                showToast('Usuario removido localmente.', 'info');
             }
         }
 
@@ -998,17 +1094,26 @@
             const list = document.getElementById('listaCeladores');
             list.innerHTML = '';
 
-            const celadores = db.usuarios.filter(u => u.rol === 'Celador');
-            celadores.forEach(c => {
+            db.usuarios.forEach(c => {
+                const isClientAdmin = c.rol === 'Administrador';
+                const icon = isClientAdmin ? 'fa-user-gear text-amber-500' : 'fa-user-shield text-slate-400';
+                
                 const li = document.createElement('li');
                 li.className = "flex justify-between items-center py-3 text-sm";
                 li.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-user-shield text-slate-400"></i>
-                        <span class="font-medium text-slate-700">${c.email}</span>
-                        <span class="text-xs text-slate-400 font-mono">(${c.pass})</span>
+                    <div class="flex-1 min-w-0 pr-2">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid ${icon}"></i>
+                            <span class="font-semibold text-slate-800 truncate">${c.name}</span>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${isClientAdmin ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">${c.rol}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 mt-1 space-y-0.5">
+                            <div><span class="font-medium text-slate-400">Usuario:</span> <span class="font-mono text-slate-700">${c.username}</span></div>
+                            <div><span class="font-medium text-slate-400">Correo:</span> ${c.email || 'No asignado'}</div>
+                            <div><span class="font-medium text-slate-400">Tel:</span> ${c.phone || 'No asignado'}</div>
+                        </div>
                     </div>
-                    <button onclick="eliminarUsuario('${c.email}')" class="text-rose-500 hover:text-rose-700 transition">
+                    <button onclick="eliminarUsuario('${c.username}')" class="text-rose-500 hover:text-rose-700 transition flex-shrink-0 p-1">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 `;
@@ -1018,6 +1123,14 @@
 
         // --- SISTEMA DE PANELES ---
         function switchPanel(panelName) {
+            // CONTROL DE SEGURIDAD ESTRICTO: Solo el rol de Administrador puede ingresar a la configuración
+            if (panelName === 'config') {
+                if (!activeUser || activeUser.rol !== 'Administrador') {
+                    showToast('Acceso denegado. Únicamente los administradores tienen acceso a la configuración.', 'error');
+                    return;
+                }
+            }
+
             const panels = document.querySelectorAll('.app-panel');
             panels.forEach(p => p.classList.add('hidden'));
 
