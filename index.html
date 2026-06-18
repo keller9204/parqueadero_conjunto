@@ -236,6 +236,38 @@
 
         <!-- Pestaña de Configuración (Solo visible para Admin) -->
         <div id="panelConfig" class="app-panel space-y-4 hidden">
+            
+            <!-- NUEVA SECCIÓN: Auditoría de Turnos de Personal -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-business-time text-emerald-600"></i> Auditoría de Turnos (Entrada/Salida)
+                </h3>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filtrar por Día</label>
+                            <input id="filtroFechaTurnos" type="date" onchange="renderTurnos()" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filtrar Celador</label>
+                            <select id="filtroUsuarioTurnos" onchange="renderTurnos()" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <option value="Todos">-- Todos --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
+                        <span>Historial de Marcaciones</span>
+                        <span id="turnosHoyCount" class="text-slate-400 font-mono text-[10px]">0 registros</span>
+                    </h4>
+                    <ul id="listaTurnos" class="divide-y divide-slate-100 max-h-56 overflow-y-auto pr-1 text-xs">
+                        <!-- Lista dinámica de turnos filtrados -->
+                    </ul>
+                </div>
+            </div>
+
             <!-- Sección Tarifas por Minuto -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -457,6 +489,7 @@
         let db = {
             usuarios: [],
             registros: [],
+            turnos: [], // Almacén local de auditoría de turnos
             config: {
                 tarifaCarro: 50, // default COP/minuto
                 tarifaMoto: 25,  // default COP/minuto
@@ -475,6 +508,49 @@
         let isSubmittingSalida = false;
         let isSubmittingCelador = false;
 
+        // --- SISTEMA DE HORARIOS CON ZONA HORARIA DE BOGOTÁ, COLOMBIA ---
+        
+        // Formateador completo: dd/mm/aaaa, hh:mm:ss am/pm
+        function formatBogotaDateTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return new Intl.DateTimeFormat('es-CO', {
+                timeZone: 'America/Bogota',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }).format(date);
+        }
+
+        // Formateador de tiempo: hh:mm am/pm
+        function formatBogotaTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return new Intl.DateTimeFormat('es-CO', {
+                timeZone: 'America/Bogota',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }).format(date);
+        }
+
+        // Formateador de fecha: aaaa-mm-dd (ideal para comparar con inputs tipo date)
+        function formatBogotaDateISO(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return new Intl.DateTimeFormat('en-CA', { // 'en-CA' devuelve formato YYYY-MM-DD
+                timeZone: 'America/Bogota',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(date);
+        }
+
+        // --- STREAMING_CHUNK: Implementando sistema de Alertas (Toasts) ---
         // --- SISTEMA DE TOASTS (Alertas Modernas) ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -501,12 +577,17 @@
             }, 3500);
         }
 
+        // --- STREAMING_CHUNK: Cargando configuración de inicio y bases locales ---
         // --- INICIALIZACIÓN ---
         window.onload = async function() {
             // Cargar base de datos del LocalStorage para tener datos inmediatos antes de sincronizar
             const localData = localStorage.getItem('park_db');
             if (localData) {
                 db = JSON.parse(localData);
+                // Garantizar que exista la estructura del log de turnos local
+                if (!db.turnos) {
+                    db.turnos = [];
+                }
                 // Migración automática de usuarios antiguos (si existen de versiones previas)
                 if (db.usuarios && db.usuarios.length > 0 && !db.usuarios[0].username) {
                     db.usuarios = db.usuarios.map(u => ({
@@ -524,7 +605,15 @@
                     { name: 'Administrador General', username: 'admin', email: 'admin@conjunto.com', phone: '3001234567', rol: 'Administrador', pass: 'admin' },
                     { name: 'Portería Principal', username: 'celador', email: 'porteria@conjunto.com', phone: '3007654321', rol: 'Celador', pass: '1234' }
                 ];
+                db.turnos = [];
                 saveDb();
+            }
+
+            // Fijar la fecha actual de Bogotá por defecto en el filtro de turnos
+            const todayInBogota = formatBogotaDateISO(new Date().toISOString());
+            const inputFecha = document.getElementById('filtroFechaTurnos');
+            if (inputFecha) {
+                inputFecha.value = todayInBogota;
             }
 
             checkAuthentication();
@@ -548,6 +637,7 @@
             localStorage.setItem('park_db', JSON.stringify(db));
         }
 
+        // --- STREAMING_CHUNK: Métodos de sincronización bidireccional de datos con n8n ---
         // --- SINCRONIZACIÓN CON GOOGLE SHEETS (VÍA n8n) ---
         
         // 1. Obtener datos desde Google Sheets (PULL) con protección de CORS, de-duplicación y Timeout
@@ -571,7 +661,7 @@
                     const cloudData = await response.json();
                     
                     // Validar la estructura mínima devuelta por n8n desde el Google Sheet
-                    if (cloudData.usuarios || cloudData.registros || cloudData.config) {
+                    if (cloudData.usuarios || cloudData.registros || cloudData.config || cloudData.turnos) {
                         if (cloudData.usuarios && Array.isArray(cloudData.usuarios)) {
                             if (cloudData.usuarios.length === 0) {
                                 cloudData.usuarios = [
@@ -579,6 +669,11 @@
                                 ];
                             }
                             db.usuarios = cloudData.usuarios;
+                        }
+                        
+                        // Sincronizar el log de turnos desde el Sheet
+                        if (cloudData.turnos && Array.isArray(cloudData.turnos)) {
+                            db.turnos = cloudData.turnos;
                         }
                         
                         // DE-DUPLICACIÓN: Filtramos los registros por ID único para evitar que se dupliquen visualmente en móviles
@@ -615,6 +710,8 @@
                         saveDb();
                         renderActivos();
                         renderCeladoresList();
+                        renderFiltrosTurnos(); // Actualizar el select de celadores
+                        renderTurnos(); // Pintar logs de entrada y salida
                         actualizarBadgeSincronizacion(true, "Nube OK");
                         showToast("Sincronización con Google Sheets completada exitosamente.");
                     } else {
@@ -633,6 +730,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Lógica para enviar eventos de escritura a n8n ---
         // 2. Enviar evento en tiempo real a Google Sheets (PUSH)
         async function pushToCloud(actionType, actionData) {
             try {
@@ -665,6 +763,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Registro de auditoría de turnos y marcaciones ---
         // 3. Auditoría de Turnos (Entrada/Salida de Celador)
         async function registrarTurnoCelador(actionType, user) {
             const shiftRecord = {
@@ -674,9 +773,15 @@
                 email: user.email,
                 phone: user.phone,
                 rol: user.rol,
-                timestamp: new Date().toISOString(),
+                timestamp: new Date().toISOString(), // Enviamos en ISO UTC
                 evento: actionType === 'INGRESO_TURNO' ? 'Entrada Turno' : 'Salida Turno'
             };
+
+            // Guardar localmente también para que el admin lo visualice de inmediato
+            if (!db.turnos) db.turnos = [];
+            db.turnos.push(shiftRecord);
+            saveDb();
+            renderTurnos();
 
             const pushExitoso = await pushToCloud(actionType, shiftRecord);
             if (pushExitoso) {
@@ -703,6 +808,7 @@
             await pullFromCloud();
         }
 
+        // --- STREAMING_CHUNK: Lógica de inicialización y dibujado del Canvas para firmas ---
         // --- MANEJO DE FIRMA DIGITAL (CANVAS) ---
         const canvasRefs = {};
         
@@ -779,6 +885,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Sistema de autenticación de seguridad y control de sesiones ---
         // --- SISTEMA DE AUTENTICACIÓN (PROTECCIÓN DE ACCESO ABSOLUTO) ---
         function checkAuthentication() {
             const session = sessionStorage.getItem('park_session');
@@ -849,6 +956,8 @@
                 badge.className = "bg-amber-500 text-slate-900 text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider";
                 adminTab.classList.remove('hidden');
                 renderCeladoresList();
+                renderFiltrosTurnos();
+                renderTurnos();
             } else {
                 badge.className = "bg-emerald-800 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
                 adminTab.classList.add('hidden');
@@ -856,6 +965,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Sistema para modificar contraseñas individuales de usuarios ---
         // --- SISTEMA DE CAMBIO DE CLAVE DEL PERFIL LOGUEADO ---
         function openMyPasswordModal() {
             document.getElementById('myCurrentPass').value = '';
@@ -960,6 +1070,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Métodos para registrar ingresos de carros/motos con control de doble submit ---
         // --- REGISTRO DE VEHÍCULOS (INGRESO CON BLOQUEO DE DOBLE CLIC) ---
         function toggleVehicleType(type) {
             const carLabel = document.getElementById('labelCarro');
@@ -1069,6 +1180,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Métodos para pintar y actualizar la vista de carros activos ---
         // --- INTERFAZ: VEHÍCULOS ACTIVOS & SALIDAS ---
         function renderActivos() {
             const listContainer = document.getElementById('listaActivos');
@@ -1098,7 +1210,7 @@
             activos.forEach(reg => {
                 const badgeColor = reg.tipo === 'Carro' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700';
                 const icon = reg.tipo === 'Carro' ? 'fa-car' : 'fa-motorcycle';
-                const formatTime = new Date(reg.horaIngreso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const formatTime = formatBogotaTime(reg.horaIngreso);
 
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm flex flex-col justify-between space-y-3";
@@ -1135,6 +1247,7 @@
             });
         }
 
+        // --- STREAMING_CHUNK: Lógica matemática de cobro de minutos con horas de cortesía ---
         // --- MODAL DE COBRO & CÁLCULOS POR MINUTO + HORAS GRATIS ---
         function abrirSalidaModal(id) {
             activeCheckoutId = id;
@@ -1163,8 +1276,8 @@
 
             document.getElementById('checkoutPlaca').innerText = reg.placa;
             document.getElementById('checkoutTipo').innerText = reg.tipo;
-            document.getElementById('checkoutIngreso').innerText = entryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + entryDate.toLocaleDateString() + ')';
-            document.getElementById('checkoutSalida').innerText = exitDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('checkoutIngreso').innerText = formatBogotaDateTime(reg.horaIngreso);
+            document.getElementById('checkoutSalida').innerText = formatBogotaDateTime(exitDate.toISOString());
             
             // Texto detallado de duración en sitio
             let durationText = `${hours}h ${minutes}m`;
@@ -1262,6 +1375,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Lógica administrativa de guardado de tarifas e incentivos ---
         // --- SISTEMA DE CONFIGURACIÓN (ADMINISTRADOR) ---
         function toggleHorasGratisInput() {
             const checked = document.getElementById('horasGratisHabilitadas').checked;
@@ -1305,6 +1419,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Cambiar contraseña de administrador principal ---
         // Cambio de contraseña seguro para el Administrador
         async function cambiarPasswordAdmin() {
             const currentPass = document.getElementById('adminCurrentPass').value;
@@ -1350,6 +1465,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Registro de nuevo personal y celadores ---
         async function crearCelador() {
             if (isSubmittingCelador) return;
 
@@ -1385,6 +1501,7 @@
             db.usuarios.push(nuevoUsuario);
             saveDb();
             renderCeladoresList();
+            renderFiltrosTurnos(); // Actualizar filtros de turnos
             
             // Limpiar inputs
             document.getElementById('nuevoCeladorName').value = '';
@@ -1424,6 +1541,7 @@
             db.usuarios = db.usuarios.filter(u => u.username !== username);
             saveDb();
             renderCeladoresList();
+            renderFiltrosTurnos(); // Actualizar filtros de turnos
             showToast('Eliminando usuario centralmente...');
 
             // Sincronizar la eliminación del celador con Google Sheets
@@ -1477,6 +1595,90 @@
             });
         }
 
+        // --- STREAMING_CHUNK: Creando el listado y filtros de auditoría de turnos ---
+        // --- SECCIÓN AUDITORÍA DE TURNOS ---
+        function renderFiltrosTurnos() {
+            const selectCelador = document.getElementById('filtroUsuarioTurnos');
+            if (!selectCelador) return;
+
+            const valActual = selectCelador.value;
+            selectCelador.innerHTML = '<option value="Todos">-- Todos --</option>';
+
+            db.usuarios.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.username;
+                opt.innerText = `${u.name} (${u.username})`;
+                selectCelador.appendChild(opt);
+            });
+
+            selectCelador.value = valActual;
+        }
+
+        function renderTurnos() {
+            const list = document.getElementById('listaTurnos');
+            const totalCountLabel = document.getElementById('turnosHoyCount');
+            if (!list) return;
+
+            const filtroFecha = document.getElementById('filtroFechaTurnos').value; // YYYY-MM-DD
+            const filtroCelador = document.getElementById('filtroUsuarioTurnos').value;
+
+            list.innerHTML = '';
+
+            if (!db.turnos) {
+                db.turnos = [];
+            }
+
+            // Filtrar turnos basándonos en la fecha normalizada a Bogotá y en el celador seleccionado
+            const turnosFiltrados = db.turnos.filter(turno => {
+                const fechaTurnoBogota = formatBogotaDateISO(turno.timestamp); // Devuelve YYYY-MM-DD
+                const coincideFecha = fechaTurnoBogota === filtroFecha;
+                const coincideCelador = (filtroCelador === 'Todos' || turno.username === filtroCelador);
+                return coincideFecha && coincideCelador;
+            });
+
+            // Ordenar los turnos de manera cronológica (el más reciente primero)
+            turnosFiltrados.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            totalCountLabel.innerText = `${turnosFiltrados.length} registros`;
+
+            if (turnosFiltrados.length === 0) {
+                list.innerHTML = `
+                    <li class="py-4 text-center text-slate-400 bg-slate-50 rounded-xl">
+                        <i class="fa-solid fa-calendar-xmark text-lg mb-1 block"></i>
+                        No hay registros de turnos para este día.
+                    </li>
+                `;
+                return;
+            }
+
+            turnosFiltrados.forEach(turno => {
+                const horaBogota = formatBogotaTime(turno.timestamp);
+                const isEntrada = turno.evento.toLowerCase().includes('entrada');
+                const badgeColor = isEntrada ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                const icon = isEntrada ? 'fa-arrow-right-to-bracket text-emerald-600' : 'fa-arrow-right-from-bracket text-rose-600';
+
+                const li = document.createElement('li');
+                li.className = "py-2.5 flex justify-between items-center";
+                li.innerHTML = `
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                        <span class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid ${icon} text-sm"></i>
+                        </span>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 truncate text-xs">${turno.name}</p>
+                            <p class="text-[10px] text-slate-400 font-semibold uppercase">${turno.rol} • @${turno.username}</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="${badgeColor} px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">${isEntrada ? 'Entrada' : 'Salida'}</span>
+                        <p class="text-[11px] text-slate-700 font-bold mt-1 font-mono">${horaBogota}</p>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // --- STREAMING_CHUNK: Sistema de control de paneles y visibilidad de pestañas ---
         // --- SISTEMA DE PANELES ---
         function switchPanel(panelName) {
             // CONTROL DE SEGURIDAD ESTRICTO: Solo el rol de Administrador puede ingresar a la configuración
@@ -1509,6 +1711,8 @@
             } else if (panelName === 'config') {
                 document.getElementById('panelConfig').classList.remove('hidden');
                 btnConfig.className = "flex-1 py-3 flex flex-col items-center text-emerald-600";
+                renderFiltrosTurnos();
+                renderTurnos();
             }
         }
     </script>
