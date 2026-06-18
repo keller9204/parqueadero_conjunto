@@ -470,6 +470,11 @@
         let activeCheckoutId = null;
         let editingUserTargetUsername = null;
 
+        // Banderas de bloqueo de doble envío táctil/móvil
+        let isSubmittingIngreso = false;
+        let isSubmittingSalida = false;
+        let isSubmittingCelador = false;
+
         // --- SISTEMA DE TOASTS (Alertas Modernas) ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -545,7 +550,7 @@
 
         // --- SINCRONIZACIÓN CON GOOGLE SHEETS (VÍA n8n) ---
         
-        // 1. Obtener datos desde Google Sheets (PULL) con protección de CORS y Timeout
+        // 1. Obtener datos desde Google Sheets (PULL) con protección de CORS, de-duplicación y Timeout
         async function pullFromCloud() {
             actualizarBadgeSincronizacion(true, "Cargando...");
             let timeoutId;
@@ -575,9 +580,20 @@
                             }
                             db.usuarios = cloudData.usuarios;
                         }
+                        
+                        // DE-DUPLICACIÓN: Filtramos los registros por ID único para evitar que se dupliquen visualmente en móviles
                         if (cloudData.registros && Array.isArray(cloudData.registros)) {
-                            db.registros = cloudData.registros;
+                            const registrosUnicos = [];
+                            const idsVistos = new Set();
+                            cloudData.registros.forEach(reg => {
+                                if (reg && reg.id && !idsVistos.has(reg.id)) {
+                                    idsVistos.add(reg.id);
+                                    registrosUnicos.push(reg);
+                                }
+                            });
+                            db.registros = registrosUnicos;
                         }
+                        
                         if (cloudData.config) {
                             db.config.tarifaCarro = cloudData.config.tarifaCarro || db.config.tarifaCarro;
                             db.config.tarifaMoto = cloudData.config.tarifaMoto || db.config.tarifaMoto;
@@ -944,7 +960,7 @@
             }
         }
 
-        // --- REGISTRO DE VEHÍCULOS (INGRESO) ---
+        // --- REGISTRO DE VEHÍCULOS (INGRESO CON BLOQUEO DE DOBLE CLIC) ---
         function toggleVehicleType(type) {
             const carLabel = document.getElementById('labelCarro');
             const motoLabel = document.getElementById('labelMoto');
@@ -961,64 +977,96 @@
         async function registrarIngreso(event) {
             event.preventDefault();
 
+            // Bloquear si ya se está enviando una petición para evitar duplicados en celulares
+            if (isSubmittingIngreso) return;
+
             if (!canvasRefs['firmaIngresoCanvas'].hasSignature) {
                 showToast('Por favor, solicite la firma del conductor antes de registrar el ingreso.', 'error');
                 return;
             }
 
-            const tipo = document.querySelector('input[name="tipoVehiculo"]:checked').value;
-            const placa = document.getElementById('placa').value.toUpperCase().trim();
-            const bloque = document.getElementById('bloque').value.trim();
-            const apartamento = document.getElementById('apartamento').value.trim();
-            const autoriza = document.getElementById('autoriza').value.trim();
-            const telefono = document.getElementById('telefono').value.trim();
+            isSubmittingIngreso = true;
             
-            const firmaB64 = canvasRefs['firmaIngresoCanvas'].canvas.toDataURL();
-
-            // Validar si el carro ya se encuentra adentro en la memoria local actual
-            const yaAdentro = db.registros.some(r => r.placa === placa && r.estado === 'Dentro');
-            if (yaAdentro) {
-                showToast(`El vehículo con placa ${placa} ya registra ingreso activo en el conjunto.`, 'error');
-                return;
+            // Efecto visual de envío en el botón
+            const form = event.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Registrando...`;
             }
 
-            const nuevoRegistro = {
-                id: 'REG-' + Date.now(),
-                tipo,
-                placa,
-                bloque,
-                apartamento,
-                autoriza,
-                telefono,
-                horaIngreso: new Date().toISOString(),
-                firmaIngreso: firmaB64,
-                horaSalida: null,
-                firmaSalida: null,
-                estado: 'Dentro',
-                costo: 0
-            };
+            try {
+                const tipo = document.querySelector('input[name="tipoVehiculo"]:checked').value;
+                const placa = document.getElementById('placa').value.toUpperCase().trim();
+                const bloque = document.getElementById('bloque').value.trim();
+                const apartamento = document.getElementById('apartamento').value.trim();
+                const autoriza = document.getElementById('autoriza').value.trim();
+                const telefono = document.getElementById('telefono').value.trim();
+                
+                const firmaB64 = canvasRefs['firmaIngresoCanvas'].canvas.toDataURL();
 
-            // Guardar localmente
-            db.registros.push(nuevoRegistro);
-            saveDb();
-            renderActivos();
+                // Validar si el carro ya se encuentra adentro en la memoria local actual
+                const yaAdentro = db.registros.some(r => r.placa === placa && r.estado === 'Dentro');
+                if (yaAdentro) {
+                    showToast(`El vehículo con placa ${placa} ya registra ingreso activo en el conjunto.`, 'error');
+                    isSubmittingIngreso = false;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHTML;
+                    }
+                    return;
+                }
 
-            showToast('Guardando ingreso localmente...');
+                const nuevoRegistro = {
+                    id: 'REG-' + Date.now(),
+                    tipo,
+                    placa,
+                    bloque,
+                    apartamento,
+                    autoriza,
+                    telefono,
+                    horaIngreso: new Date().toISOString(),
+                    firmaIngreso: firmaB64,
+                    horaSalida: null,
+                    firmaSalida: null,
+                    estado: 'Dentro',
+                    costo: 0
+                };
 
-            // Enviar evento de registro de ingreso a Google Sheets por medio de n8n
-            const pushExitoso = await pushToCloud('REGISTRAR_INGRESO', nuevoRegistro);
-            if (pushExitoso) {
-                showToast('Ingreso sincronizado con Google Sheets.');
-            } else {
-                showToast('Guardado de respaldo. Se sincronizará en la próxima actualización.', 'info');
+                // Guardar localmente de inmediato
+                db.registros.push(nuevoRegistro);
+                saveDb();
+                renderActivos();
+
+                showToast('Guardando ingreso localmente...');
+
+                // Enviar evento de registro de ingreso a Google Sheets por medio de n8n
+                const pushExitoso = await pushToCloud('REGISTRAR_INGRESO', nuevoRegistro);
+                if (pushExitoso) {
+                    showToast('Ingreso sincronizado con Google Sheets.');
+                } else {
+                    showToast('Guardado de respaldo local listo.', 'info');
+                }
+                
+                // Limpiar formulario y firmas
+                form.reset();
+                clearCanvas('firmaIngresoCanvas');
+                toggleVehicleType('Carro');
+
+                switchPanel('activos');
+
+            } catch (err) {
+                console.error("Error al registrar ingreso:", err);
+                showToast("Ocurrió un error al procesar el ingreso. Intente nuevamente.", "error");
+            } finally {
+                // Restaurar el botón de envío
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHTML;
+                }
+                isSubmittingIngreso = false;
             }
-            
-            // Limpiar formulario
-            document.getElementById('ingresoForm').reset();
-            clearCanvas('firmaIngresoCanvas');
-            toggleVehicleType('Carro');
-
-            switchPanel('activos');
         }
 
         // --- INTERFAZ: VEHÍCULOS ACTIVOS & SALIDAS ---
@@ -1147,6 +1195,9 @@
         async function completarSalida() {
             if (!activeCheckoutId) return;
 
+            // Bloquear para evitar dobles envíos en celulares
+            if (isSubmittingSalida) return;
+
             if (!canvasRefs['firmaSalidaCanvas'].hasSignature) {
                 showToast('Se requiere la firma del conductor para certificar la salida.', 'error');
                 return;
@@ -1155,38 +1206,59 @@
             const reg = db.registros.find(r => r.id === activeCheckoutId);
             if (!reg) return;
 
-            const firmaSalidaB64 = canvasRefs['firmaSalidaCanvas'].canvas.toDataURL();
+            isSubmittingSalida = true;
 
-            reg.horaSalida = reg.tmpHoraSalida;
-            reg.costo = reg.tmpCosto;
-            reg.firmaSalida = firmaSalidaB64;
-            reg.estado = 'Completado';
+            // Bloquear botón visualmente
+            const submitBtn = document.querySelector('#salidaModal button[onclick="completarSalida()"]');
+            const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Procesando...`;
+            }
 
-            const duracionFinal = reg.tmpDuracionTxt;
+            try {
+                const firmaSalidaB64 = canvasRefs['firmaSalidaCanvas'].canvas.toDataURL();
 
-            delete reg.tmpCosto;
-            delete reg.tmpHoraSalida;
-            delete reg.tmpDuracionTxt;
+                reg.horaSalida = reg.tmpHoraSalida;
+                reg.costo = reg.tmpCosto;
+                reg.firmaSalida = firmaSalidaB64;
+                reg.estado = 'Completado';
 
-            saveDb();
-            renderActivos();
-            closeSalidaModal();
-            showToast('Salida registrada en base local.');
+                const duracionFinal = reg.tmpDuracionTxt;
 
-            // Envía evento de salida a Google Sheets y dispara el correo mediante n8n
-            showToast('Sincronizando salida y enviando correo...');
-            const datosParaEnvio = {
-                ...reg,
-                duracion: duracionFinal,
-                costoFormateado: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reg.costo),
-                correoDestino: db.config.correoDestino
-            };
+                delete reg.tmpCosto;
+                delete reg.tmpHoraSalida;
+                delete reg.tmpDuracionTxt;
 
-            const pushExitoso = await pushToCloud('REGISTRAR_SALIDA', datosParaEnvio);
-            if (pushExitoso) {
-                showToast('Salida guardada en Google Sheets e Email enviado.');
-            } else {
-                showToast('Guardado temporalmente. Verifique n8n/internet.', 'error');
+                saveDb();
+                renderActivos();
+                closeSalidaModal();
+                showToast('Salida registrada en base local.');
+
+                // Envía evento de salida a Google Sheets y dispara el correo mediante n8n
+                showToast('Sincronizando salida y enviando correo...');
+                const datosParaEnvio = {
+                    ...reg,
+                    duracion: duracionFinal,
+                    costoFormateado: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reg.costo),
+                    correoDestino: db.config.correoDestino
+                };
+
+                const pushExitoso = await pushToCloud('REGISTRAR_SALIDA', datosParaEnvio);
+                if (pushExitoso) {
+                    showToast('Salida guardada en Google Sheets e Email enviado.');
+                } else {
+                    showToast('Guardado temporalmente en cola de espera.', 'error');
+                }
+            } catch (err) {
+                console.error("Error al procesar salida:", err);
+                showToast("Ocurrió un error al guardar la salida.", "error");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHTML;
+                }
+                isSubmittingSalida = false;
             }
         }
 
@@ -1279,6 +1351,8 @@
         }
 
         async function crearCelador() {
+            if (isSubmittingCelador) return;
+
             const name = document.getElementById('nuevoCeladorName').value.trim();
             const username = document.getElementById('nuevoCeladorUser').value.trim();
             const pass = document.getElementById('nuevoCeladorPass').value.trim();
@@ -1296,6 +1370,8 @@
                 showToast('El nombre de usuario ya se encuentra registrado.', 'error');
                 return;
             }
+
+            isSubmittingCelador = true;
 
             const nuevoUsuario = {
                 name,
@@ -1324,6 +1400,8 @@
                 usuariosActualizados: db.usuarios,
                 usuarioCreado: nuevoUsuario
             });
+
+            isSubmittingCelador = false;
 
             if (pushExitoso) {
                 showToast('Usuario registrado en la base de datos central de Google Sheets.');
