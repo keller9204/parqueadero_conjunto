@@ -131,7 +131,7 @@
         <!-- MÓDULO 1: CONTROL DE PARQUEADERO (VISITANTES) -->
         <!-- ========================================================================= -->
         <div id="panelParqueadero" class="app-panel space-y-4">
-            <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+            <div id="tabParqueaderoNavegacion" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('parqueadero', 'ingresar')" id="btnSubParqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
                     <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Ingreso
                 </button>
@@ -391,7 +391,7 @@
         <!-- MÓDULO 4: ALERTAS DE CORRESPONDENCIA Y PAQUETERÍA EXPRESS -->
         <!-- ========================================================================= -->
         <div id="panelPaqueteria" class="app-panel space-y-4 hidden">
-            <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+            <div id="tabsPaqueteriaContainer" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('paqueteria', 'ingresar')" id="btnSubPaqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
                     <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Paquete
                 </button>
@@ -546,8 +546,50 @@
             <!-- Gestión de Celadores/Propietarios/Usuarios -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-users text-emerald-600"></i> Control de Usuarios
+                    <i class="fa-solid fa-users text-emerald-600"></i> Gestión de Personal
                 </h3>
+                
+                <!-- Registrar Nuevo Personal (Celador / Administrador) -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Registrar Nuevo Personal</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre Completo</label>
+                            <input id="nuevoCeladorName" type="text" placeholder="Ej. Juan Pérez" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Usuario (Acceso)</label>
+                                <input id="nuevoCeladorUser" type="text" placeholder="juan.perez" class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Contraseña</label>
+                                <input id="nuevoCeladorPass" type="password" placeholder="••••" class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Teléfono</label>
+                                <input id="nuevoCeladorPhone" type="tel" placeholder="3001234567" class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Rol</label>
+                                <select id="nuevoCeladorRol" class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
+                                    <option value="Celador">Celador</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Correo Electrónico</label>
+                            <input id="nuevoCeladorEmail" type="email" placeholder="juan@conjunto.com" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                        </div>
+                        <button onclick="crearCelador()" class="w-full py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg transition hover:bg-emerald-700 shadow">
+                            Agregar Personal
+                        </button>
+                    </div>
+                </div>
+
                 <div class="space-y-2">
                     <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Usuarios del Sistema</h4>
                     <ul id="listaCeladores" class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
@@ -558,6 +600,25 @@
         </div>
 
     </main>
+
+    <!-- MODAL CAMBIAR CONTRASEÑA USUARIO (ADMIN ONLY) -->
+    <div id="changePasswordModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-md font-bold text-slate-800">Cambiar Contraseña</h3>
+                <button onclick="closePasswordModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 mb-2">Nueva contraseña para: <strong id="changePassUsername" class="text-slate-700"></strong></p>
+                <input id="newUserPasswordVal" type="text" placeholder="Nueva contraseña" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <button onclick="guardarNuevaPasswordUsuario()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow">
+                Guardar Contraseña
+            </button>
+        </div>
+    </div>
 
     <!-- MODAL DE SALIDA DE VEHÍCULO -->
     <div id="salidaModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-end sm:items-center justify-center p-4">
@@ -666,9 +727,22 @@
     </nav>
 
     <script>
-        // --- WEBHOOKS INTEGRADOS (Actualizados) ---
-        let webhookPush = localStorage.getItem('webhook_push_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
-        let webhookPull = localStorage.getItem('webhook_pull_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
+        // --- WEBHOOKS INTEGRADOS (Actualizados y Auto-limpiados de caché de localStorage anterior) ---
+        let defaultPush = 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
+        let defaultPull = 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
+
+        let webhookPush = localStorage.getItem('webhook_push_url');
+        let webhookPull = localStorage.getItem('webhook_pull_url');
+
+        // Reset automático si existen configuraciones con las URLs de webhooks antiguos en el navegador del usuario
+        if (!webhookPush || webhookPush.includes('procesar-accion') || webhookPush.includes('procesar_accion')) {
+            webhookPush = defaultPush;
+            localStorage.setItem('webhook_push_url', defaultPush);
+        }
+        if (!webhookPull || webhookPull.includes('obtener-datos') || webhookPull.includes('obtener_datos')) {
+            webhookPull = defaultPull;
+            localStorage.setItem('webhook_pull_url', defaultPull);
+        }
 
         // --- BASE DE DATOS LOCAL ---
         let db = {
@@ -693,6 +767,7 @@
         let activeCheckoutId = null;
         let activeEntregaPaqueteId = null;
         let b64FotoPaquete = null;
+        let userToChangePassword = null; // Para control del Admin Modal de contraseña
 
         // --- SISTEMA DE TOASTS ---
         function showToast(message, type = 'success') {
@@ -752,46 +827,6 @@
             db.config.tarifaCarro = Number(db.config.tarifaCarro) || 3000;
             db.config.tarifaMoto = Number(db.config.tarifaMoto) || 1500;
             db.config.correoDestino = db.config.correoDestino || 'admin@conjunto.com';
-        }
-
-        // --- INICIALIZACIÓN ---
-        window.onload = async function() {
-            const localData = localStorage.getItem('park_db');
-            if (localData) {
-                try { db = JSON.parse(localData); } catch (e) { console.warn(e); }
-            }
-            sanitizeDb();
-
-            const setElementValue = (id, value) => {
-                const element = document.getElementById(id);
-                if (element) element.value = value;
-            };
-
-            setElementValue('webhookPushUrl', webhookPush);
-            setElementValue('webhookPullUrl', webhookPull);
-
-            setupCanvas('firmaIngresoCanvas');
-            setupCanvas('firmaSalidaCanvas');
-            setupCanvas('firmaEntregaCanvas');
-
-            renderActivos();
-            renderDynamicZones();
-            renderReservas();
-            renderMudanzas();
-            renderPaquetes();
-            renderCeladoresList();
-            renderZonasAdminList();
-            
-            setElementValue('tarifaCarro', db.config.tarifaCarro);
-            setElementValue('tarifaMoto', db.config.tarifaMoto);
-            setElementValue('correoDestino', db.config.correoDestino);
-
-            checkAuthentication();
-            await pullFromCloud();
-        };
-
-        function saveDb() {
-            localStorage.setItem('park_db', JSON.stringify(db));
         }
 
         // --- PESTAÑAS DE LOGIN / REGISTRO ---
@@ -1037,9 +1072,10 @@
             const btnSubZonasReservar = document.getElementById('btnSubZonasReservar');
             const btnSubMudRegistrar = document.getElementById('btnSubMudRegistrar');
             
-            // Sub-pestañas internas de Parqueadero para controlar visibilidad
+            // Sub-pestañas de Parqueadero y Paquetes para controlar visibilidad
             const btnSubParqIngresar = document.getElementById('btnSubParqIngresar');
             const btnSubParqActivos = document.getElementById('btnSubParqActivos');
+            const btnSubPaqIngresar = document.getElementById('btnSubPaqIngresar');
 
             if (!badge || !adminTab) return;
             if (!activeUser) return;
@@ -1053,8 +1089,16 @@
                 btnNavPaqueteria.classList.remove('hidden');
                 if (btnSubParqIngresar) btnSubParqIngresar.classList.remove('hidden');
                 if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
+                if (btnSubPaqIngresar) btnSubPaqIngresar.classList.remove('hidden');
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
                 if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
+                
+                // Mostrar contenedores de pestañas
+                const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                if (tabsParqueadero) tabsParqueadero.classList.remove('hidden');
+                const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
+                if (tabsPaqueteria) tabsPaqueteria.classList.remove('hidden');
+
                 switchPanel('parqueadero');
             } else if (activeUser.rol === 'Celador') {
                 badge.className = "bg-emerald-800 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
@@ -1063,6 +1107,13 @@
                 btnNavPaqueteria.classList.remove('hidden');
                 if (btnSubParqIngresar) btnSubParqIngresar.classList.remove('hidden');
                 if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
+                if (btnSubPaqIngresar) btnSubPaqIngresar.classList.remove('hidden');
+                
+                // Mostrar contenedores de pestañas
+                const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                if (tabsParqueadero) tabsParqueadero.classList.remove('hidden');
+                const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
+                if (tabsPaqueteria) tabsPaqueteria.classList.remove('hidden');
                 
                 // Restricción Celador: Solo ver Zonas y Mudanzas, no puede crear registros en ellas
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.add('hidden');
@@ -1076,11 +1127,13 @@
                 
                 // El propietario SÍ puede ver la sección de Parqueadero para consultar quién está en sitio
                 btnNavParqueadero.classList.remove('hidden');
-                // PERO se le oculta la opción para registrar nuevos ingresos
-                if (btnSubParqIngresar) btnSubParqIngresar.classList.add('hidden');
-                if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
+                btnNavPaqueteria.classList.remove('hidden'); // SÍ ve paquetes
                 
-                btnNavPaqueteria.classList.add('hidden');
+                // Ocultar barras de pestañas de registro para Propietarios
+                const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                if (tabsParqueadero) tabsParqueadero.classList.add('hidden');
+                const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
+                if (tabsPaqueteria) tabsPaqueteria.classList.add('hidden');
                 
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
                 if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
@@ -1469,7 +1522,7 @@
 
             // Filtrado: Si es Propietario, solo ve sus propias reservas
             const listado = activeUser.rol === 'Propietario' ? 
-                db.reservas.filter(r => r.bloque === activeUser.bloque && r.apto === activeUser.apto) : 
+                db.reservas.filter(r => r.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && r.apto.toLowerCase() === activeUser.apto.toLowerCase()) : 
                 db.reservas;
 
             if (listado.length === 0) {
@@ -1572,7 +1625,7 @@
 
             // Filtrado: Si es Propietario, solo ve sus mudanzas
             const listado = activeUser.rol === 'Propietario' ? 
-                db.mudanzas.filter(m => m.bloque === activeUser.bloque && m.apto === activeUser.apto) : 
+                db.mudanzas.filter(m => m.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && m.apto.toLowerCase() === activeUser.apto.toLowerCase()) : 
                 db.mudanzas;
 
             if (listado.length === 0) {
@@ -1690,7 +1743,16 @@
 
             if (!activeUser) return;
 
-            const pendientes = db.paquetes.filter(p => p.estado === 'Pendiente');
+            // Filtrado: Si es Propietario, solo ve sus propios paquetes
+            const pendientes = db.paquetes.filter(p => {
+                const esPendiente = p.estado === 'Pendiente';
+                if (!esPendiente) return false;
+                if (activeUser.rol === 'Propietario') {
+                    return p.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && p.apto.toLowerCase() === activeUser.apto.toLowerCase();
+                }
+                return true;
+            });
+
             if (pendientes.length === 0) {
                 container.innerHTML = `
                     <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2 text-xs">
@@ -1725,6 +1787,14 @@
                     `;
                 }
 
+                // Ocultar botón de firma para el propietario
+                const esPropietario = activeUser.rol === 'Propietario';
+                const botonEntregaHtml = esPropietario ? '' : `
+                    <button onclick="abrirEntregaPaqueteModal('${paq.id}')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-signature"></i> Firmar y Entregar
+                    </button>
+                `;
+
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
@@ -1739,9 +1809,7 @@
                         ${imgHtml}
                     </div>
                     ${contactoHtml}
-                    <button onclick="abrirEntregaPaqueteModal('${paq.id}')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors">
-                        <i class="fa-solid fa-signature"></i> Firmar y Entregar
-                    </button>
+                    ${botonEntregaHtml}
                 `;
                 container.appendChild(card);
             });
@@ -1804,7 +1872,7 @@
             await pushToCloud('ACTUALIZAR_CONFIG', db.config);
         }
 
-        // --- RENDERIZADO Y CONTROL DE USUARIOS (Celadores/Propietarios) ---
+        // --- RENDERIZADO Y CONTROL DE USUARIOS (Celadores/Propietarios/Admin) ---
         function renderCeladoresList() {
             const list = document.getElementById('listaCeladores');
             if (!list) return;
@@ -1826,15 +1894,84 @@
                         </div>
                         <div class="text-xs text-slate-500 mt-1 space-y-0.5">
                             <div><span class="font-medium text-slate-400">Usuario:</span> <span class="font-mono text-slate-700">${c.username}</span></div>
+                            <div><span class="font-medium text-slate-400">Contraseña:</span> <span class="font-mono text-slate-600 bg-slate-100 px-1 rounded">${c.pass}</span></div>
                             ${isPropietario ? `<div><span class="font-medium text-slate-400">Ubicación:</span> Blq ${c.bloque} - Apt ${c.apto}</div>` : ''}
                         </div>
                     </div>
-                    <button onclick="eliminarUsuario('${c.username}')" class="text-rose-500 hover:text-rose-700 p-1 flex-shrink-0">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <div class="flex items-center space-x-1.5 flex-shrink-0">
+                        <button onclick="cambiarPasswordUsuarioPrompt('${c.username}')" class="text-amber-500 hover:text-amber-700 p-1" title="Cambiar Contraseña">
+                            <i class="fa-solid fa-key text-base"></i>
+                        </button>
+                        <button onclick="eliminarUsuario('${c.username}')" class="text-rose-500 hover:text-rose-700 p-1" title="Eliminar Usuario">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
                 `;
                 list.appendChild(li);
             });
+        }
+
+        async function crearCelador() {
+            const nameEl = document.getElementById('nuevoCeladorName');
+            const usernameEl = document.getElementById('nuevoCeladorUser');
+            const passEl = document.getElementById('nuevoCeladorPass');
+            const phoneEl = document.getElementById('nuevoCeladorPhone');
+            const rolEl = document.getElementById('nuevoCeladorRol');
+            const emailEl = document.getElementById('nuevoCeladorEmail');
+
+            if (!nameEl || !usernameEl || !passEl || !phoneEl || !rolEl || !emailEl) return;
+
+            const name = nameEl.value.trim();
+            const username = usernameEl.value.trim().toLowerCase();
+            const pass = passEl.value.trim();
+            const phone = phoneEl.value.trim();
+            const rol = rolEl.value;
+            const email = emailEl.value.trim().toLowerCase();
+
+            if (!name || !username || !pass || !phone || !email) {
+                showToast('Debe completar todos los campos del nuevo usuario.', 'error');
+                return;
+            }
+
+            const existe = db.usuarios.some(u => u.username.toLowerCase() === username.toLowerCase());
+            if (existe) {
+                showToast('El nombre de usuario ya se encuentra registrado.', 'error');
+                return;
+            }
+
+            const nuevoUsuario = {
+                name,
+                username,
+                pass,
+                phone,
+                rol,
+                email,
+                bloque: '', // Vacíos para no residentes
+                apto: ''
+            };
+
+            db.usuarios.push(nuevoUsuario);
+            saveDb();
+            renderCeladoresList();
+            
+            nameEl.value = '';
+            usernameEl.value = '';
+            passEl.value = '';
+            phoneEl.value = '';
+            emailEl.value = '';
+
+            showToast('Sincronizando nuevo usuario...');
+            
+            const pushExitoso = await pushToCloud('CREAR_USUARIO', {
+                usuariosActualizados: db.usuarios,
+                usuarioCreado: nuevoUsuario
+            });
+
+            if (pushExitoso) {
+                showToast('Usuario registrado en Google Sheets.');
+            } else {
+                showToast('Agregado localmente. Guardado en cola de sincronización.', 'info');
+            }
         }
 
         async function eliminarUsuario(username) {
@@ -1856,6 +1993,63 @@
                 usuariosActualizados: db.usuarios,
                 usuarioEliminadoUsername: username
             });
+        }
+
+        // --- SISTEMA DE CAMBIO DE CONTRASEÑA ---
+        function cambiarPasswordUsuarioPrompt(username) {
+            userToChangePassword = username;
+            const u = db.usuarios.find(user => user.username === username);
+            if (!u) return;
+
+            const nameEl = document.getElementById('changePassUsername');
+            if (nameEl) nameEl.innerText = `${u.name} (${u.username})`;
+
+            const passInput = document.getElementById('newUserPasswordVal');
+            if (passInput) passInput.value = u.pass; // Precargar contraseña actual
+
+            const modal = document.getElementById('changePasswordModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+            userToChangePassword = null;
+        }
+
+        async function guardarNuevaPasswordUsuario() {
+            if (!userToChangePassword) return;
+            const newPassVal = document.getElementById('newUserPasswordVal').value.trim();
+            if (!newPassVal) {
+                showToast('La contraseña no puede estar vacía.', 'error');
+                return;
+            }
+
+            const uIdx = db.usuarios.findIndex(user => user.username === userToChangePassword);
+            if (uIdx !== -1) {
+                db.usuarios[uIdx].pass = newPassVal;
+                
+                // Si el usuario es el actual logueado, actualizar sesión activa
+                if (activeUser && activeUser.username === userToChangePassword) {
+                    activeUser.pass = newPassVal;
+                    sessionStorage.setItem('park_session', JSON.stringify(activeUser));
+                }
+
+                saveDb();
+                renderCeladoresList();
+                closePasswordModal();
+                showToast('Contraseña actualizada localmente.');
+
+                const exito = await pushToCloud('ACTUALIZAR_USUARIO', {
+                    usuariosActualizados: db.usuarios,
+                    usuarioModificado: db.usuarios[uIdx]
+                });
+
+                if (exito) {
+                    showToast('Contraseña sincronizada con Google Sheets.');
+                } else {
+                    showToast('Guardado localmente. Pendiente de sincronización.', 'info');
+                }
+            }
         }
 
         // --- SISTEMA DE PANELES ---
@@ -1894,8 +2088,12 @@
                 // Enrutamiento forzado de sub-pestañas:
                 // Si el usuario es Propietario, lo obligamos a ver directamente "Vehículos Adentro" (activos)
                 if (activeUser && activeUser.rol === 'Propietario') {
-                    switchSubTab('parqueadero', 'activos');
+                    document.getElementById('subParqIngresar').classList.add('hidden');
+                    document.getElementById('subParqActivos').classList.remove('hidden');
                 } else {
+                    // Mostrar u ocultar barra de pestañas para Celadores/Admins
+                    const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                    if (tabsParqueadero) tabsParqueadero.classList.remove('hidden');
                     switchSubTab('parqueadero', 'ingresar');
                 }
                 renderActivos();
@@ -1907,6 +2105,16 @@
                 renderMudanzas();
             } else if (panelName === 'paqueteria') {
                 document.getElementById('panelPaqueteria').classList.remove('hidden');
+                if (activeUser && activeUser.rol === 'Propietario') {
+                    // Forzar mostrar subPanel de Inventario directo
+                    document.getElementById('subPaqueteriaIngresar').classList.add('hidden');
+                    document.getElementById('subPaqueteriaInventario').classList.remove('hidden');
+                } else {
+                    // Mostrar u ocultar barra de pestañas para Celadores/Admins
+                    const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
+                    if (tabsPaqueteria) tabsPaqueteria.classList.remove('hidden');
+                    switchSubTab('paqueteria', 'ingresar');
+                }
                 renderPaquetes();
             } else if (panelName === 'config') {
                 document.getElementById('panelConfig').classList.remove('hidden');
