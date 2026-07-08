@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParkResidente - PWA Control de Parqueadero</title>
+    <title>ParkResidente - PWA Residencial Integral</title>
     <!-- Configuración para PWA / Pantalla Completa Móvil -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,7 +11,7 @@
     <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fuentes de Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- FontAwesome para Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -25,7 +25,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-20">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-24">
 
     <!-- Header de la Aplicación -->
     <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-50 hidden">
@@ -34,41 +34,45 @@
                 <i class="fa-solid fa-square-parking text-2xl text-amber-300 animate-pulse"></i>
                 <h1 class="font-bold text-lg tracking-tight">ParkResidente</h1>
             </div>
-            <div class="flex items-center space-x-1.5">
+            <div class="flex items-center space-x-2">
                 <!-- Indicador de Sincronización con Google Sheets -->
-                <span id="syncStatusBadge" onclick="forzarSincronizacion()" class="cursor-pointer text-[10px] bg-emerald-800 text-emerald-200 px-2 py-1 rounded-lg flex items-center gap-0.5 font-semibold">
+                <span id="syncStatusBadge" onclick="forzarSincronizacion()" class="cursor-pointer text-[10px] bg-emerald-800 text-emerald-200 px-2 py-1 rounded-lg flex items-center gap-1 font-semibold">
                     <i class="fa-solid fa-cloud"></i> <span id="syncStatusText">Local</span>
                 </span>
-                <span id="roleBadge" class="bg-emerald-800 text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider">Celador</span>
-                
-                <!-- Botón para cambiar contraseña del perfil activo -->
-                <button onclick="openMyPasswordModal()" title="Cambiar mi contraseña" class="text-white hover:text-emerald-200 transition duration-150 p-1">
-                    <i class="fa-solid fa-key text-sm"></i>
-                </button>
-                
-                <!-- Botón de salida -->
-                <button id="logoutBtn" onclick="logout()" class="text-white hover:text-red-200 transition duration-150 p-1">
-                    <i class="fa-solid fa-right-from-bracket text-md"></i>
+                <span id="roleBadge" class="bg-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">Celador</span>
+                <button id="logoutBtn" onclick="logout()" class="text-white hover:text-red-200 transition duration-150 pl-1">
+                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Pantalla de Login (Fondo 100% Opaco y Hermoso Logotipo) -->
-    <div id="loginSection" class="hidden fixed inset-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-950 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-6">
+    <!-- Pantalla de Login y Registro -->
+    <div id="loginSection" class="hidden fixed inset-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-6 my-8">
             <div class="text-center">
-                <!-- Logotipo Principal Animado -->
                 <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                     <i class="fa-solid fa-square-parking text-4xl text-emerald-600 animate-pulse"></i>
                 </div>
                 <h2 class="text-2xl font-black text-slate-800 tracking-tight">ParkResidente</h2>
-                <p class="text-slate-500 text-sm">Control de Seguridad de Visitantes</p>
+                <p class="text-slate-500 text-sm">Control Residencial Integrado</p>
             </div>
-            <div class="space-y-4">
+
+            <!-- Selector de Pestaña: Login vs Registro Propietario -->
+            <div class="flex border-b border-slate-100 pb-1">
+                <button id="tabLoginBtn" onclick="switchLoginTab('login')" class="flex-1 pb-2 text-center text-sm font-bold border-b-2 border-emerald-500 text-emerald-600">
+                    Iniciar Sesión
+                </button>
+                <button id="tabRegistroBtn" onclick="switchLoginTab('registro')" class="flex-1 pb-2 text-center text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600">
+                    Registrar Propietario
+                </button>
+            </div>
+
+            <!-- Formulario de Iniciar Sesión -->
+            <div id="formLoginContainer" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Usuario o Correo</label>
-                    <input id="loginUser" type="text" placeholder="Celador o Administrador" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input id="loginUser" type="text" placeholder="Celador, Propietario o Admin" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Contraseña</label>
@@ -81,324 +85,472 @@
                     <span class="text-[11px] text-slate-400">Default: Admin (admin / admin) | Celador (celador / 1234)</span>
                 </div>
             </div>
+
+            <!-- Formulario de Registro Propietario -->
+            <div id="formRegistroContainer" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nombre Completo</label>
+                    <input id="regNombre" type="text" placeholder="Ej. Liliana Patiño" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Correo Electrónico</label>
+                    <input id="regEmail" type="email" placeholder="ejemplo@correo.com" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Teléfono Móvil</label>
+                    <input id="regTelefono" type="tel" placeholder="3124567890" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
+                        <input id="regBloque" type="text" placeholder="Ej. Torre 2" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
+                        <input id="regApto" type="text" placeholder="Ej. 1402" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Contraseña de Acceso</label>
+                    <input id="regPassword" type="password" placeholder="••••••••" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <button onclick="registrarPropietario()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition duration-150 shadow-lg shadow-emerald-600/30 text-sm">
+                    Crear Cuenta Propietario
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Contenedor Principal (Optimizado para móvil, oculto si no hay sesión) -->
+    <!-- Contenedor Principal (Optimizado para móvil) -->
     <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4 hidden">
 
         <!-- Contenedor de Alertas Personalizado -->
         <div id="toastContainer" class="fixed top-16 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm z-50 pointer-events-none"></div>
 
-        <!-- Pestaña de Nuevo Ingreso -->
-        <div id="panelIngresos" class="app-panel space-y-4">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-file-signature text-emerald-600"></i> Registrar Ingreso
-                </h2>
-                <form id="ingresoForm" onsubmit="registrarIngreso(event)" class="space-y-4">
-                    <!-- Selector de Vehículo -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Tipo de Vehículo</label>
+        <!-- ========================================================================= -->
+        <!-- MÓDULO 1: CONTROL DE PARQUEADERO (VISITANTES) -->
+        <!-- ========================================================================= -->
+        <div id="panelParqueadero" class="app-panel space-y-4">
+            <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+                <button onclick="switchSubTab('parqueadero', 'ingresar')" id="btnSubParqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Ingreso
+                </button>
+                <button onclick="switchSubTab('parqueadero', 'activos')" id="btnSubParqActivos" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-car mr-1"></i> Vehículos Adentro
+                </button>
+            </div>
+
+            <!-- Sub Pestaña: Registrar Ingreso -->
+            <div id="subParqIngresar" class="sub-panel space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-file-signature text-emerald-600"></i> Registrar Ingreso
+                    </h2>
+                    <form id="ingresoForm" onsubmit="registrarIngreso(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Tipo de Vehículo</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold" id="labelCarro">
+                                    <input type="radio" name="tipoVehiculo" value="Carro" checked class="hidden" onchange="toggleVehicleType('Carro')">
+                                    <i class="fa-solid fa-car text-lg mr-2"></i> Carro
+                                </label>
+                                <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-slate-200 text-slate-600" id="labelMoto">
+                                    <input type="radio" name="tipoVehiculo" value="Moto" class="hidden" onchange="toggleVehicleType('Moto')">
+                                    <i class="fa-solid fa-motorcycle text-lg mr-2"></i> Moto
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="placa" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Placa / Patente</label>
+                            <input id="placa" type="text" required placeholder="ABC123D" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase font-mono text-lg tracking-wider">
+                        </div>
+
                         <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold" id="labelCarro">
-                                <input type="radio" name="tipoVehiculo" value="Carro" checked class="hidden" onchange="toggleVehicleType('Carro')">
-                                <i class="fa-solid fa-car text-lg mr-2"></i> Carro
-                            </label>
-                            <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-slate-200 text-slate-600" id="labelMoto">
-                                <input type="radio" name="tipoVehiculo" value="Moto" class="hidden" onchange="toggleVehicleType('Moto')">
-                                <i class="fa-solid fa-motorcycle text-lg mr-2"></i> Moto
-                            </label>
+                            <div>
+                                <label for="bloque" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
+                                <input id="bloque" type="text" required placeholder="Torre 2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label for="apartamento" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
+                                <input id="apartamento" type="text" required placeholder="1402" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Placa del Vehículo -->
-                    <div>
-                        <label for="placa" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Placa / Patente</label>
-                        <input id="placa" type="text" required placeholder="ABC123D" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase font-mono text-lg tracking-wider">
-                    </div>
-
-                    <!-- Bloque y Apartamento -->
-                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label for="bloque" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
-                            <input id="bloque" type="text" required placeholder="Torre 2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label for="autoriza" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nombre Autoriza (Residente)</label>
+                            <input id="autoriza" type="text" required placeholder="Liliana Patiño" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
+
                         <div>
-                            <label for="apartamento" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
-                            <input id="apartamento" type="text" required placeholder="1402" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label for="telefono" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Teléfono Contacto</label>
+                            <input id="telefono" type="tel" required placeholder="3124567890" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
-                    </div>
 
-                    <!-- Autorización y Teléfono -->
-                    <div>
-                        <label for="autoriza" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nombre Autoriza (Residente)</label>
-                        <input id="autoriza" type="text" required placeholder="Liliana Patiño" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-
-                    <div>
-                        <label for="telefono" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Teléfono Contacto</label>
-                        <input id="telefono" type="tel" required placeholder="3124567890" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-
-                    <!-- Panel de Firma de Ingreso -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex justify-between items-center">
-                            <span>Firma Digital de Ingreso</span>
-                            <button type="button" onclick="clearCanvas('firmaIngresoCanvas')" class="text-red-500 hover:text-red-600 text-xs font-bold">Limpiar</button>
-                        </label>
-                        <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative">
-                            <canvas id="firmaIngresoCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex justify-between items-center">
+                                <span>Firma Digital de Ingreso</span>
+                                <button type="button" onclick="clearCanvas('firmaIngresoCanvas')" class="text-red-500 hover:text-red-600 text-xs font-bold">Limpiar</button>
+                            </label>
+                            <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative">
+                                <canvas id="firmaIngresoCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
+                            </div>
                         </div>
-                    </div>
 
-                    <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition duration-150 shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Registrar Ingreso Exitoso
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Pestaña de Vehículos Activos -->
-        <div id="panelActivos" class="app-panel space-y-4 hidden">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-emerald-600"></i> Vehículos Dentro
-                </h2>
-                <span id="activosCount" class="bg-slate-200 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">0 En Sitio</span>
-            </div>
-
-            <!-- Lista de Tarjetas de Vehículos -->
-            <div id="listaActivos" class="space-y-3">
-                <!-- Se poblará dinámicamente -->
-            </div>
-        </div>
-
-        <!-- Modal de Salida (Cálculo y Firma de Salida) -->
-        <div id="salidaModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-end sm:items-center justify-center p-4">
-            <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-receipt text-amber-500"></i> Registrar Salida
-                    </h3>
-                    <button onclick="closeSalidaModal()" class="text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
+                        <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition duration-150 shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Registrar Ingreso Exitoso
+                        </button>
+                    </form>
                 </div>
+            </div>
 
-                <div class="space-y-4">
-                    <!-- Resumen del cobro -->
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-slate-500 text-sm font-semibold">Placa:</span>
-                            <span id="checkoutPlaca" class="font-mono font-bold text-slate-800"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500 text-sm font-semibold">Tipo:</span>
-                            <span id="checkoutTipo" class="font-bold text-slate-800"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500 text-sm font-semibold">Ingreso:</span>
-                            <span id="checkoutIngreso" class="text-sm font-semibold text-slate-800"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500 text-sm font-semibold">Salida:</span>
-                            <span id="checkoutSalida" class="text-sm font-semibold text-slate-800"></span>
-                        </div>
-                        <div class="flex justify-between flex-wrap gap-y-1">
-                            <span class="text-slate-500 text-sm font-semibold">Tiempo transcurrido:</span>
-                            <span id="checkoutDuracion" class="font-bold text-emerald-600 text-right w-full sm:w-auto text-sm"></span>
-                        </div>
-                        <hr class="my-2 border-dashed">
-                        <div class="flex justify-between items-center pt-2">
-                            <span class="text-slate-800 font-bold text-md">Costo Total:</span>
-                            <span id="checkoutCosto" class="text-2xl font-black text-emerald-600"></span>
-                        </div>
-                    </div>
-
-                    <!-- Panel de Firma de Salida -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex justify-between items-center">
-                            <span>Firma Digital de Salida</span>
-                            <button type="button" onclick="clearCanvas('firmaSalidaCanvas')" class="text-red-500 hover:text-red-600 text-xs font-bold">Limpiar</button>
-                        </label>
-                        <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative">
-                            <canvas id="firmaSalidaCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
-                        </div>
-                    </div>
-
-                    <button onclick="completarSalida()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition duration-150 shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> Finalizar y Reportar Salida
-                    </button>
+            <!-- Sub Pestaña: Vehículos Adentro -->
+            <div id="subParqActivos" class="sub-panel space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-emerald-600"></i> Vehículos Dentro
+                    </h2>
+                    <span id="activosCount" class="bg-slate-200 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">0 En Sitio</span>
+                </div>
+                <div id="listaActivos" class="space-y-3">
+                    <!-- Dinámico -->
                 </div>
             </div>
         </div>
 
-        <!-- Pestaña de Configuración (Solo visible para Admin) -->
-        <div id="panelConfig" class="app-panel space-y-4 hidden">
-            
-            <!-- NUEVA SECCIÓN: Auditoría de Turnos de Personal -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-business-time text-emerald-600"></i> Auditoría de Turnos (Entrada/Salida)
-                </h3>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-3">
-                    <div class="grid grid-cols-2 gap-2">
+        <!-- ========================================================================= -->
+        <!-- MÓDULO 2: CONTROL Y RESERVA DE ZONAS COMUNES -->
+        <!-- ========================================================================= -->
+        <div id="panelZonas" class="app-panel space-y-4 hidden">
+            <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+                <button onclick="switchSubTab('zonas', 'reservar')" id="btnSubZonasReservar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> Agendar Reserva
+                </button>
+                <button onclick="switchSubTab('zonas', 'calendario')" id="btnSubZonasCalendario" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-calendar-days mr-1"></i> Calendario / Log
+                </button>
+            </div>
+
+            <!-- Sub Pestaña: Agendar Reserva -->
+            <div id="subZonasReservar" class="sub-panel space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-plus text-emerald-600"></i> Reserva Automatizada
+                    </h2>
+                    <form id="reservaForm" onsubmit="registrarReserva(event)" class="space-y-4">
                         <div>
-                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filtrar por Día</label>
-                            <input id="filtroFechaTurnos" type="date" onchange="renderTurnos()" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filtrar Celador</label>
-                            <select id="filtroUsuarioTurnos" onchange="renderTurnos()" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                                <option value="Todos">-- Todos --</option>
+                            <label for="zonaComun" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Zona Común</label>
+                            <select id="zonaComun" required onchange="actualizarInfoZona()" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <!-- Cargado dinámicamente -->
                             </select>
+                            <div id="infoZonaTarifa" class="text-xs text-emerald-600 font-bold mt-1">Costo: --</div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
-                        <span>Historial de Marcaciones</span>
-                        <span id="turnosHoyCount" class="text-slate-400 font-mono text-[10px]">0 registros</span>
-                    </h4>
-                    <ul id="listaTurnos" class="divide-y divide-slate-100 max-h-56 overflow-y-auto pr-1 text-xs">
-                        <!-- Lista dinámica de turnos filtrados -->
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Sección Tarifas por Minuto -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-stopwatch text-emerald-600"></i> Control de Tarifas (Por Minuto)
-                </h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label for="tarifaCarro" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Minuto Carro (COP)</label>
-                        <input id="tarifaCarro" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
-                    </div>
-                    <div>
-                        <label for="tarifaMoto" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Minuto Moto (COP)</label>
-                        <input id="tarifaMoto" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
-                    </div>
-                </div>
-
-                <!-- Configuración de Horas Gratis -->
-                <div class="border-t pt-4 space-y-3">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cortesía / Horas Gratis</h4>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input id="horasGratisHabilitadas" type="checkbox" onchange="toggleHorasGratisInput()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4">
-                        <span class="text-sm font-semibold text-slate-700">Habilitar Horas Gratis</span>
-                    </label>
-                    <div id="horasGratisCantidadContainer" class="hidden">
-                        <label for="horasGratisCantidad" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Cantidad de Horas Gratis</label>
-                        <input id="horasGratisCantidad" type="number" step="0.5" min="0" placeholder="Ej: 1 o 1.5" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                </div>
-
-                <button onclick="guardarConfiguracion()" class="w-full py-3 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl transition">
-                    Guardar Tarifas e Incentivos
-                </button>
-            </div>
-
-            <!-- Sección de Cambio de Contraseña del Administrador -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-key text-emerald-600"></i> Cambiar mi Contraseña de Administrador
-                </h3>
-                <div class="space-y-3">
-                    <div>
-                        <label for="adminCurrentPass" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Contraseña Actual</label>
-                        <input id="adminCurrentPass" type="password" placeholder="Contraseña actual" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                    <div>
-                        <label for="adminNewPass" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nueva Contraseña</label>
-                        <input id="adminNewPass" type="password" placeholder="Nueva contraseña" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                </div>
-                <button onclick="cambiarPasswordAdmin()" class="w-full py-3 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl transition">
-                    Actualizar Mi Contraseña
-                </button>
-            </div>
-
-            <!-- Sección Servidor de Reportes e Integración (Conexiones Internas Protegidas) -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-envelope text-emerald-600"></i> Servidor de Reportes e Integración
-                </h3>
-                <div class="space-y-3">
-                    <div>
-                        <label for="correoDestino" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Correo para Envío de Reportes</label>
-                        <input id="correoDestino" type="email" placeholder="admin@conjunto.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
-                    </div>
-                    <hr class="border-slate-100 my-2">
-                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 space-y-1">
-                        <p class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle-check text-emerald-600"></i> Canales de Sincronización Protegidos
-                        </p>
-                        <p class="text-[11px] text-emerald-600 leading-relaxed">
-                            Las conexiones API con los flujos de n8n para Google Sheets se encuentran integradas a nivel de código de forma interna y no son modificables visualmente.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button onclick="guardarConfiguracion()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl transition text-sm">
-                        Guardar Ajustes
-                    </button>
-                    <button onclick="forzarSincronizacion()" class="px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition text-sm flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-rotate"></i> Sincronizar
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sección Gestión de Personal -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-users text-emerald-600"></i> Gestión de Personal
-                </h3>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Registrar Nuevo Personal</h4>
-                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="zonaBloque" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
+                                <input id="zonaBloque" type="text" required placeholder="Bloque 1" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
+                            </div>
+                            <div>
+                                <label for="zonaApto" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
+                                <input id="zonaApto" type="text" required placeholder="503" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
+                            </div>
+                        </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre Completo</label>
-                            <input id="nuevoCeladorName" type="text" placeholder="Ej. Juan Pérez" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            <label for="zonaNombre" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nombre Residente</label>
+                            <input id="zonaNombre" type="text" required placeholder="Andrés Ospina" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Usuario (Acceso)</label>
-                                <input id="nuevoCeladorUser" type="text" placeholder="juan.perez" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <label for="zonaFecha" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Uso</label>
+                                <input id="zonaFecha" type="date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Contraseña</label>
-                                <input id="nuevoCeladorPass" type="password" placeholder="••••" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <label for="zonaHora" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Inicio</label>
+                                <input id="zonaHora" type="time" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Método de Pago</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold" id="labelPagoSoporte">
+                                    <input type="radio" name="zonaMetodoPago" value="Soporte" checked class="hidden" onchange="toggleMetodoPago('Soporte')">
+                                    Adjuntar Recibo
+                                </label>
+                                <label class="flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-slate-200 text-slate-500" id="labelPagoFactura">
+                                    <input type="radio" name="zonaMetodoPago" value="Factura" class="hidden" onchange="toggleMetodoPago('Factura')">
+                                    Cargar Factura
+                                </label>
+                            </div>
+                        </div>
+                        <div id="contenedorSoportePago">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Adjuntar Comprobante de Pago</label>
+                            <input id="zonaComprobante" type="file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                        </div>
+                        <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-calendar-check"></i> Agendar Reserva y Enviar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sub Pestaña: Calendario / Log -->
+            <div id="subZonasCalendario" class="sub-panel space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-emerald-600"></i> Historial de Reservas
+                    </h2>
+                </div>
+                <div id="listaReservas" class="space-y-3">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MÓDULO 3: REGISTRO EXTENDIDO DE MUDANZAS Y TRASTEOS -->
+        <!-- ========================================================================= -->
+        <div id="panelMudanzas" class="app-panel space-y-4 hidden">
+            <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+                <button onclick="switchSubTab('mudanzas', 'registrar')" id="btnSubMudRegistrar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> Programar Mudanza
+                </button>
+                <button onclick="switchSubTab('mudanzas', 'porteria')" id="btnSubMudPorteria" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Control Portería
+                </button>
+            </div>
+
+            <!-- Sub Pestaña: Programar Mudanza -->
+            <div id="subMudanzasRegistrar" class="sub-panel space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-truck-moving text-emerald-600"></i> Registro de Mudanza
+                    </h2>
+                    <form id="mudanzaForm" onsubmit="registrarMudanza(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Teléfono</label>
-                                <input id="nuevoCeladorPhone" type="tel" placeholder="3001234567" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
+                                <input id="mudBloque" type="text" required placeholder="Bloque 4" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl disabled:opacity-75 disabled:bg-slate-100">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Rol</label>
-                                <select id="nuevoCeladorRol" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                                    <option value="Celador">Celador</option>
-                                    <option value="Administrador">Administrador</option>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
+                                <input id="mudApto" type="text" required placeholder="201" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl disabled:opacity-75 disabled:bg-slate-100">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Trasteo</label>
+                                <input id="mudFecha" type="date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Estimada</label>
+                                <input id="mudHora" type="time" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Empresa de Trasteos</label>
+                            <input id="mudEmpresa" type="text" required placeholder="Mudanzas Express S.A.S." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Placa Camión</label>
+                                <input id="mudPlaca" type="text" required placeholder="SXP-872" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Tipo Trasteo</label>
+                                <select id="mudTipo" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                                    <option value="Entrada">Entrada (Ingreso)</option>
+                                    <option value="Salida">Salida (Egreso)</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Correo Electrónico</label>
-                            <input id="nuevoCeladorEmail" type="email" placeholder="juan@conjunto.com" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Operarios Autorizados (Nombres/Cédulas)</label>
+                            <textarea id="mudOperarios" required placeholder="Escriba nombres y cédulas separados por comas..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl h-20 text-xs focus:outline-none"></textarea>
                         </div>
-                        <button onclick="crearCelador()" class="w-full py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg transition hover:bg-emerald-700 shadow shadow-emerald-600/20">
-                            Agregar Personal
+                        <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Enviar Autorización Mudanza
                         </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sub Pestaña: Control Portería -->
+            <div id="subMudanzasPorteria" class="sub-panel space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-emerald-600"></i> Mudanzas Programadas
+                    </h2>
+                </div>
+                <div id="listaMudanzas" class="space-y-3">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MÓDULO 4: ALERTAS DE CORRESPONDENCIA Y PAQUETERÍA EXPRESS -->
+        <!-- ========================================================================= -->
+        <div id="panelPaqueteria" class="app-panel space-y-4 hidden">
+            <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+                <button onclick="switchSubTab('paqueteria', 'ingresar')" id="btnSubPaqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Paquete
+                </button>
+                <button onclick="switchSubTab('paqueteria', 'inventario')" id="btnSubPaqInventario" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-boxes-stacked mr-1"></i> En Portería
+                </button>
+            </div>
+
+            <!-- Sub Pestaña: Registrar Paquete -->
+            <div id="subPaqueteriaIngresar" class="sub-panel space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-cube text-emerald-600"></i> Registro de Paquete
+                    </h2>
+                    <form id="paqueteForm" onsubmit="registrarPaquete(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
+                                <input id="paqBloque" type="text" required placeholder="Bloque 3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
+                                <input id="paqApto" type="text" required placeholder="1204" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Destinatario (Residente)</label>
+                            <input id="paqDestinatario" type="text" required placeholder="Nombre del residente" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Empresa / Transportadora</label>
+                            <select id="paqCourier" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                                <option value="MercadoLibre">MercadoLibre</option>
+                                <option value="Amazon">Amazon</option>
+                                <option value="Servientrega">Servientrega</option>
+                                <option value="Coordinadora">Coordinadora</option>
+                                <option value="Interrapidisimo">Interrapidisimo</option>
+                                <option value="DHL">DHL</option>
+                                <option value="Otro">Otro (Especial/Servicio Postal)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Foto rápida de la etiqueta</label>
+                            <div class="flex items-center space-x-3">
+                                <input id="paqFoto" type="file" accept="image/*" capture="environment" onchange="procesarFotoPaquete(event)" class="hidden">
+                                <button type="button" onclick="document.getElementById('paqFoto').click()" class="flex items-center gap-2 px-4 py-3 border border-dashed border-emerald-500 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs hover:bg-emerald-100 transition">
+                                    <i class="fa-solid fa-camera text-base"></i> Capturar con Cámara
+                                </button>
+                                <span id="paqFotoEstado" class="text-xs text-slate-400">Sin foto adjunta</span>
+                            </div>
+                            <img id="paqFotoPreview" class="mt-3 rounded-lg max-h-32 hidden shadow-sm border border-slate-100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Vista previa">
+                        </div>
+                        <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Registrar Entrada y Notificar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sub Pestaña: Inventario en Portería -->
+            <div id="subPaqueteriaInventario" class="sub-panel space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-box-open text-emerald-600"></i> Paquetes Pendientes
+                    </h2>
+                </div>
+                <div id="listaPaquetes" class="space-y-3">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MÓDULO 5: CONFIGURACIÓN / ADMINISTRACIÓN -->
+        <!-- ========================================================================= -->
+        <div id="panelConfig" class="app-panel space-y-4 hidden">
+            <!-- Sección Tarifas Generales Parqueadero -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-dollar-sign text-emerald-600"></i> Tarifas Parqueadero
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="tarifaCarro" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Carro (COP)</label>
+                        <input id="tarifaCarro" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
+                    </div>
+                    <div>
+                        <label for="tarifaMoto" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Moto (COP)</label>
+                        <input id="tarifaMoto" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
                     </div>
                 </div>
+                <div>
+                    <label for="correoDestino" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Correo Notificaciones</label>
+                    <input id="correoDestino" type="email" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
+                </div>
+                <button onclick="guardarConfiguracion()" class="w-full py-3 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl transition">
+                    Guardar Parámetros
+                </button>
+            </div>
 
+            <!-- Nuevo Módulo de Gestión de Zonas Comunes y Tarifas (Admin Only) -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-emerald-600"></i> Gestión de Zonas Comunes
+                </h3>
+                <!-- Crear nueva zona -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Crear Nueva Zona</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nombre Zona</label>
+                            <input id="nuevaZonaNombre" type="text" placeholder="Ej. Cancha Squash" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tarifa (COP)</label>
+                            <input id="nuevaZonaTarifa" type="number" placeholder="Ej. 10000" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
+                        </div>
+                    </div>
+                    <button onclick="agregarZonaComun()" class="w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg transition hover:bg-emerald-700 shadow">
+                        Agregar Zona
+                    </button>
+                </div>
+                <!-- Listado de zonas existentes -->
                 <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Personal Registrado</h4>
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Zonas Registradas</h4>
+                    <ul id="listaZonasAdmin" class="divide-y divide-slate-100 max-h-40 overflow-y-auto">
+                        <!-- Dinámico -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Gestión de Webhooks de Integración n8n -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-network-wired text-emerald-600"></i> Integración n8n
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label for="webhookPushUrl" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Webhook PUSH de Acciones</label>
+                        <input id="webhookPushUrl" type="url" placeholder="https://..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="webhookPullUrl" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Webhook PULL de Sincronización</label>
+                        <input id="webhookPullUrl" type="url" placeholder="https://..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none">
+                    </div>
+                </div>
+                <button onclick="guardarWebhooks()" class="w-full py-3 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl transition">
+                    Guardar Canales de Red
+                </button>
+            </div>
+
+            <!-- Gestión de Celadores/Propietarios/Usuarios -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-users text-emerald-600"></i> Control de Usuarios
+                </h3>
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Usuarios del Sistema</h4>
                     <ul id="listaCeladores" class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
                         <!-- Lista dinámica -->
                     </ul>
@@ -408,152 +560,145 @@
 
     </main>
 
-    <!-- Modal Cambiar Mi Contraseña (Todos los usuarios) -->
-    <div id="myPasswordModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-key text-emerald-600"></i> Cambiar Mi Contraseña
+    <!-- MODAL DE SALIDA DE VEHÍCULO -->
+    <div id="salidaModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-receipt text-amber-500"></i> Registrar Salida
                 </h3>
-                <button onclick="closeMyPasswordModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button onclick="closeSalidaModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div class="space-y-3">
-                <div>
-                    <label for="myCurrentPass" class="block text-xs font-semibold text-slate-500 mb-1">Contraseña Actual</label>
-                    <input id="myCurrentPass" type="password" placeholder="••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none">
+            <div class="space-y-4">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 text-sm font-semibold">Placa:</span>
+                        <span id="checkoutPlaca" class="font-mono font-bold text-slate-800"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 text-sm font-semibold">Ingreso:</span>
+                        <span id="checkoutIngreso" class="text-sm font-semibold text-slate-800"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 text-sm font-semibold">Duración:</span>
+                        <span id="checkoutDuracion" class="font-bold text-emerald-600"></span>
+                    </div>
+                    <hr class="my-2 border-dashed">
+                    <div class="flex justify-between items-center pt-2">
+                        <span class="text-slate-800 font-bold text-md">Costo Total:</span>
+                        <span id="checkoutCosto" class="text-2xl font-black text-emerald-600"></span>
+                    </div>
                 </div>
                 <div>
-                    <label for="myNewPass" class="block text-xs font-semibold text-slate-500 mb-1">Nueva Contraseña</label>
-                    <input id="myNewPass" type="password" placeholder="••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex justify-between items-center">
+                        <span>Firma Digital de Salida</span>
+                        <button type="button" onclick="clearCanvas('firmaSalidaCanvas')" class="text-red-500 hover:text-red-600 text-xs font-bold">Limpiar</button>
+                    </label>
+                    <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative">
+                        <canvas id="firmaSalidaCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
+                    </div>
                 </div>
+                <button onclick="completarSalida()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                    <i class="fa-solid fa-paper-plane"></i> Finalizar Salida
+                </button>
             </div>
-            <button onclick="guardarMiPassword()" class="w-full py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg transition hover:bg-emerald-700 shadow">
-                Actualizar Contraseña
-            </button>
         </div>
     </div>
 
-    <!-- Modal Admin Cambia Contraseña de Celadores -->
-    <div id="adminEditUserPasswordModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-user-lock text-emerald-600"></i> Cambiar Contraseña de Usuario
+    <!-- MODAL DE ENTREGA DE PAQUETES -->
+    <div id="entregaPaqueteModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-signature text-emerald-600"></i> Confirmar Entrega
                 </h3>
-                <button onclick="closeAdminEditUserPasswordModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button onclick="closeEntregaModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div class="space-y-3">
-                <p class="text-xs text-slate-500">Estás editando la contraseña de: <strong id="adminEditUserTarget" class="text-slate-800"></strong></p>
-                <div>
-                    <label for="adminEditUserNewPass" class="block text-xs font-semibold text-slate-500 mb-1">Nueva Contraseña</label>
-                    <input id="adminEditUserNewPass" type="password" placeholder="••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none">
+            <div class="space-y-4">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs space-y-1.5">
+                    <div><span class="text-slate-400 font-semibold">Apartamento:</span> <strong id="entregaApt" class="text-slate-700"></strong></div>
+                    <div><span class="text-slate-400 font-semibold">Destinatario:</span> <strong id="entregaDest" class="text-slate-700"></strong></div>
+                    <div><span class="text-slate-400 font-semibold">Courier:</span> <strong id="entregaCourier" class="text-slate-700"></strong></div>
                 </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex justify-between items-center">
+                        <span>Firma del Residente que Recibe</span>
+                        <button type="button" onclick="clearCanvas('firmaEntregaCanvas')" class="text-red-500 hover:text-red-600 text-xs font-bold">Limpiar</button>
+                    </label>
+                    <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative">
+                        <canvas id="firmaEntregaCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
+                    </div>
+                </div>
+                <button onclick="completarEntregaPaquete()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i> Registrar Entrega
+                </button>
             </div>
-            <button onclick="guardarPasswordUsuarioAdmin()" class="w-full py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg transition hover:bg-emerald-700 shadow">
-                Guardar Contraseña
-            </button>
         </div>
     </div>
 
-    <!-- Barra de Navegación Fija en la Base (Look App Nativa, oculta si no hay sesión) -->
+    <!-- Barra de Navegación Fija (Look App Nativa) -->
     <nav class="bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 z-40 shadow-xl hidden">
         <div class="max-w-md mx-auto flex justify-around">
-            <button onclick="switchPanel('ingresos')" id="btnNavIngresos" class="flex-1 py-3 flex flex-col items-center text-emerald-600">
-                <i class="fa-solid fa-plus-circle text-xl mb-1"></i>
-                <span class="text-[10px] font-bold tracking-wider uppercase">Ingresar</span>
+            <button onclick="switchPanel('parqueadero')" id="btnNavParqueadero" class="flex-1 py-3 flex flex-col items-center text-emerald-600">
+                <i class="fa-solid fa-square-parking text-xl mb-1"></i>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Parqueo</span>
             </button>
-            <button onclick="switchPanel('activos')" id="btnNavActivos" class="flex-1 py-3 flex flex-col items-center text-slate-400">
-                <div class="relative">
-                    <i class="fa-solid fa-car-side text-xl mb-1"></i>
-                    <span id="badgeCountNav" class="absolute -top-1 -right-2 bg-rose-500 text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
-                </div>
-                <span class="text-[10px] font-bold tracking-wider uppercase">Adentro</span>
+            <button onclick="switchPanel('zonas')" id="btnNavZonas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
+                <i class="fa-solid fa-calendar-check text-xl mb-1"></i>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Zonas</span>
+            </button>
+            <button onclick="switchPanel('mudanzas')" id="btnNavMudanzas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
+                <i class="fa-solid fa-truck-moving text-xl mb-1"></i>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Mudanzas</span>
+            </button>
+            <button onclick="switchPanel('paqueteria')" id="btnNavPaqueteria" class="flex-1 py-3 flex flex-col items-center text-slate-400">
+                <i class="fa-solid fa-box-open text-xl mb-1"></i>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Paquetes</span>
             </button>
             <button onclick="switchPanel('config')" id="btnNavConfig" class="flex-1 py-3 flex flex-col items-center text-slate-400 hidden">
                 <i class="fa-solid fa-sliders text-xl mb-1"></i>
-                <span class="text-[10px] font-bold tracking-wider uppercase">Admin</span>
+                <span class="text-[9px] font-bold tracking-wider uppercase">Admin</span>
             </button>
         </div>
     </nav>
 
     <script>
-        // --- WEBHOOKS INTEGRADOS Y PROTEGIDOS EN EL CÓDIGO ---
-        const WEBHOOK_PUSH_URL = 'https://n8n.srv1333424.hstgr.cloud/webhook/procesar-accion';
-        const WEBHOOK_PULL_URL = 'https://n8n.srv1333424.hstgr.cloud/webhook/obtener-datos';
+        // --- WEBHOOKS INTEGRADOS ---
+        let webhookPush = localStorage.getItem('webhook_push_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/procesar-accion';
+        let webhookPull = localStorage.getItem('webhook_pull_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/obtener-datos';
 
-        // --- VARIABLES DE ESTADO LOCAL (Respaldo Offline) ---
+        // --- BASE DE DATOS LOCAL ---
         let db = {
             usuarios: [],
-            registros: [],
-            turnos: [], // Almacén local de auditoría de turnos
+            registros: [],        // Parqueadero
+            reservas: [],         // Módulo 2
+            mudanzas: [],         // Módulo 3
+            paquetes: [],         // Módulo 4
             config: {
-                tarifaCarro: 50, // default COP/minuto
-                tarifaMoto: 25,  // default COP/minuto
-                horasGratisHabilitadas: false,
-                horasGratisCantidad: 1,
-                correoDestino: 'admin@conjunto.com'
+                tarifaCarro: 3000, 
+                tarifaMoto: 1500,
+                correoDestino: 'admin@conjunto.com',
+                zonas: [
+                    { nombre: 'Salón Social', tarifa: 150000 },
+                    { nombre: 'Zona BBQ', tarifa: 50000 },
+                    { nombre: 'Cancha Múltiple', tarifa: 20000 }
+                ]
             }
         };
 
         let activeUser = null;
         let activeCheckoutId = null;
-        let editingUserTargetUsername = null;
+        let activeEntregaPaqueteId = null;
+        let b64FotoPaquete = null;
 
-        // Banderas de bloqueo de doble envío táctil/móvil
-        let isSubmittingIngreso = false;
-        let isSubmittingSalida = false;
-        let isSubmittingCelador = false;
-
-        // --- SISTEMA DE HORARIOS CON ZONA HORARIA DE BOGOTÁ, COLOMBIA ---
-        
-        // Formateador completo: dd/mm/aaaa, hh:mm:ss am/pm
-        function formatBogotaDateTime(isoString) {
-            if (!isoString) return '';
-            const date = new Date(isoString);
-            return new Intl.DateTimeFormat('es-CO', {
-                timeZone: 'America/Bogota',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-            }).format(date);
-        }
-
-        // Formateador de tiempo: hh:mm am/pm
-        function formatBogotaTime(isoString) {
-            if (!isoString) return '';
-            const date = new Date(isoString);
-            return new Intl.DateTimeFormat('es-CO', {
-                timeZone: 'America/Bogota',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            }).format(date);
-        }
-
-        // Formateador de fecha: aaaa-mm-dd (ideal para comparar con inputs tipo date)
-        function formatBogotaDateISO(isoString) {
-            if (!isoString) return '';
-            const date = new Date(isoString);
-            return new Intl.DateTimeFormat('en-CA', { // 'en-CA' devuelve formato YYYY-MM-DD
-                timeZone: 'America/Bogota',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).format(date);
-        }
-
-        // --- STREAMING_CHUNK: Implementando sistema de Alertas (Toasts) ---
-        // --- SISTEMA DE TOASTS (Alertas Modernas) ---
+        // --- SISTEMA DE TOASTS ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
+            if (!container) return;
             const toast = document.createElement('div');
             
             const bgClass = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-slate-800');
@@ -566,70 +711,85 @@
             `;
 
             container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-4', 'opacity-0');
-            }, 10);
-
+            setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('translate-y-4', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+                if (toast.parentNode) setTimeout(() => toast.remove(), 300);
+            }, 4500);
         }
 
-        // --- STREAMING_CHUNK: Cargando configuración de inicio y bases locales ---
-        // --- INICIALIZACIÓN ---
-        window.onload = async function() {
-            // Cargar base de datos del LocalStorage para tener datos inmediatos antes de sincronizar
-            const localData = localStorage.getItem('park_db');
-            if (localData) {
-                db = JSON.parse(localData);
-                // Garantizar que exista la estructura del log de turnos local
-                if (!db.turnos) {
-                    db.turnos = [];
-                }
-                // Migración automática de usuarios antiguos (si existen de versiones previas)
-                if (db.usuarios && db.usuarios.length > 0 && !db.usuarios[0].username) {
-                    db.usuarios = db.usuarios.map(u => ({
-                        name: u.name || 'Portero General',
-                        username: u.email || 'celador_legacy',
-                        email: u.email && u.email.includes('@') ? u.email : 'celador@conjunto.com',
-                        phone: '3000000000',
-                        rol: u.rol || 'Celador',
-                        pass: u.pass || '1234'
-                    }));
-                }
-            } else {
-                // Usuarios base por defecto con la estructura de datos completa
+        // --- SANITIZACIÓN ROBUSTA DE BASE DE DATOS ---
+        function sanitizeDb() {
+            if (!db || typeof db !== 'object') db = {};
+            if (!db.usuarios || !Array.isArray(db.usuarios) || db.usuarios.length === 0) {
                 db.usuarios = [
                     { name: 'Administrador General', username: 'admin', email: 'admin@conjunto.com', phone: '3001234567', rol: 'Administrador', pass: 'admin' },
                     { name: 'Portería Principal', username: 'celador', email: 'porteria@conjunto.com', phone: '3007654321', rol: 'Celador', pass: '1234' }
                 ];
-                db.turnos = [];
-                saveDb();
             }
-
-            // Fijar la fecha actual de Bogotá por defecto en el filtro de turnos
-            const todayInBogota = formatBogotaDateISO(new Date().toISOString());
-            const inputFecha = document.getElementById('filtroFechaTurnos');
-            if (inputFecha) {
-                inputFecha.value = todayInBogota;
+            if (!db.registros || !Array.isArray(db.registros)) db.registros = [];
+            if (!db.reservas || !Array.isArray(db.reservas)) db.reservas = [];
+            if (!db.mudanzas || !Array.isArray(db.mudanzas)) db.mudanzas = [];
+            if (!db.paquetes || !Array.isArray(db.paquetes)) db.paquetes = [];
+            if (!db.config || typeof db.config !== 'object') {
+                db.config = {
+                    tarifaCarro: 3000, 
+                    tarifaMoto: 1500,
+                    correoDestino: 'admin@conjunto.com',
+                    zonas: [
+                        { nombre: 'Salón Social', tarifa: 150000 },
+                        { nombre: 'Zona BBQ', tarifa: 50000 },
+                        { nombre: 'Cancha Múltiple', tarifa: 20000 }
+                    ]
+                };
             }
+            if (!db.config.zonas || !Array.isArray(db.config.zonas)) {
+                db.config.zonas = [
+                    { nombre: 'Salón Social', tarifa: 150000 },
+                    { nombre: 'Zona BBQ', tarifa: 50000 },
+                    { nombre: 'Cancha Múltiple', tarifa: 20000 }
+                ];
+            }
+            db.config.tarifaCarro = Number(db.config.tarifaCarro) || 3000;
+            db.config.tarifaMoto = Number(db.config.tarifaMoto) || 1500;
+            db.config.correoDestino = db.config.correoDestino || 'admin@conjunto.com';
+        }
 
+        // --- INICIALIZACIÓN ---
+        window.onload = async function() {
+            const localData = localStorage.getItem('park_db');
+            if (localData) {
+                try { db = JSON.parse(localData); } catch (e) { console.warn(e); }
+            }
+            sanitizeDb();
+
+            // Sincronizar y validar la sesión antes de comenzar el renderizado
             checkAuthentication();
+
+            const setElementValue = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) element.value = value;
+            };
+
+            setElementValue('webhookPushUrl', webhookPush);
+            setElementValue('webhookPullUrl', webhookPull);
+
             setupCanvas('firmaIngresoCanvas');
             setupCanvas('firmaSalidaCanvas');
-            renderActivos();
-            
-            // Autocompletar inputs de admin
-            document.getElementById('tarifaCarro').value = db.config.tarifaCarro || 50;
-            document.getElementById('tarifaMoto').value = db.config.tarifaMoto || 25;
-            document.getElementById('correoDestino').value = db.config.correoDestino || 'admin@conjunto.com';
-            document.getElementById('horasGratisHabilitadas').checked = db.config.horasGratisHabilitadas || false;
-            document.getElementById('horasGratisCantidad').value = db.config.horasGratisCantidad || 0;
-            toggleHorasGratisInput();
+            setupCanvas('firmaEntregaCanvas');
 
-            // Sincronización automática de arranque con Google Sheets
+            renderActivos();
+            renderDynamicZones();
+            renderReservas();
+            renderMudanzas();
+            renderPaquetes();
+            renderCeladoresList();
+            renderZonasAdminList();
+            
+            setElementValue('tarifaCarro', db.config.tarifaCarro);
+            setElementValue('tarifaMoto', db.config.tarifaMoto);
+            setElementValue('correoDestino', db.config.correoDestino);
+
             await pullFromCloud();
         };
 
@@ -637,20 +797,297 @@
             localStorage.setItem('park_db', JSON.stringify(db));
         }
 
-        // --- STREAMING_CHUNK: Métodos de sincronización bidireccional de datos con n8n ---
-        // --- SINCRONIZACIÓN CON GOOGLE SHEETS (VÍA n8n) ---
-        
-        // 1. Obtener datos desde Google Sheets (PULL) con protección de CORS, de-duplicación y Timeout
+        // --- PESTAÑAS DE LOGIN / REGISTRO ---
+        function switchLoginTab(tab) {
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            const tabRegistroBtn = document.getElementById('tabRegistroBtn');
+            const formLoginContainer = document.getElementById('formLoginContainer');
+            const formRegistroContainer = document.getElementById('formRegistroContainer');
+
+            if (tab === 'login') {
+                tabLoginBtn.className = "flex-1 pb-2 text-center text-sm font-bold border-b-2 border-emerald-500 text-emerald-600";
+                tabRegistroBtn.className = "flex-1 pb-2 text-center text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600";
+                formLoginContainer.classList.remove('hidden');
+                formRegistroContainer.classList.add('hidden');
+            } else {
+                tabRegistroBtn.className = "flex-1 pb-2 text-center text-sm font-bold border-b-2 border-emerald-500 text-emerald-600";
+                tabLoginBtn.className = "flex-1 pb-2 text-center text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600";
+                formRegistroContainer.classList.remove('hidden');
+                formLoginContainer.classList.add('hidden');
+            }
+        }
+
+        // --- REGISTRO DE NUEVO PROPIETARIO ---
+        async function registrarPropietario() {
+            const nombre = document.getElementById('regNombre').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const telefono = document.getElementById('regTelefono').value.trim();
+            const bloque = document.getElementById('regBloque').value.trim();
+            const apto = document.getElementById('regApto').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+
+            if (!nombre || !email || !telefono || !bloque || !apto || !password) {
+                showToast('Por favor, rellene todos los campos de registro.', 'error');
+                return;
+            }
+
+            // Validación de duplicidad por Bloque y Apartamento (Rol Propietario)
+            const apartamentoDuplicado = db.usuarios.some(u => 
+                u.rol === 'Propietario' && 
+                u.bloque.toLowerCase() === bloque.toLowerCase() && 
+                u.apto.toLowerCase() === apto.toLowerCase()
+            );
+
+            if (apartamentoDuplicado) {
+                showToast('El bloque y apartamento ya se encuentran registrados. Comuníquese con administración para actualizar sus datos.', 'error');
+                return;
+            }
+
+            // Duplicidad de correo / username
+            const correoDuplicado = db.usuarios.some(u => u.username.toLowerCase() === email.toLowerCase());
+            if (correoDuplicado) {
+                showToast('Este correo ya está registrado.', 'error');
+                return;
+            }
+
+            const nuevoPropietario = {
+                name: nombre,
+                username: email.toLowerCase(),
+                pass: password,
+                phone: telefono,
+                rol: 'Propietario',
+                email: email,
+                bloque: bloque,
+                apto: apto
+            };
+
+            db.usuarios.push(nuevoPropietario);
+            saveDb();
+            renderCeladoresList();
+
+            showToast('Cuenta de propietario creada localmente.');
+
+            // Sincronizar usuario con la nube (n8n)
+            const syncExito = await pushToCloud('CREAR_USUARIO', {
+                usuariosActualizados: db.usuarios,
+                usuarioCreado: nuevoPropietario
+            });
+
+            if (syncExito) {
+                showToast('Usuario sincronizado con Google Sheets.');
+            }
+
+            // Login automático del nuevo propietario registrado
+            sessionStorage.setItem('park_session', JSON.stringify(nuevoPropietario));
+            checkAuthentication();
+            showToast(`Sesión iniciada como Propietario de ${bloque} - ${apto}`);
+        }
+
+        // --- CONTROL DE PERSONAL (ADMIN) ---
+        function renderZonasAdminList() {
+            const list = document.getElementById('listaZonasAdmin');
+            if (!list) return;
+            list.innerHTML = '';
+            db.config.zonas.forEach((z, index) => {
+                const li = document.createElement('li');
+                li.className = "flex justify-between items-center py-2 text-xs";
+                li.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-800">${z.nombre}</span>
+                        <span class="text-slate-500 ml-1">(${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(z.tarifa)})</span>
+                    </div>
+                    <button onclick="eliminarZonaComun(${index})" class="text-rose-500 hover:text-rose-700">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        async function agregarZonaComun() {
+            const nombreEl = document.getElementById('nuevaZonaNombre');
+            const tarifaEl = document.getElementById('nuevaZonaTarifa');
+            const nombre = nombreEl.value.trim();
+            const tarifa = parseInt(tarifaEl.value);
+
+            if (!nombre || isNaN(tarifa)) {
+                showToast('Complete nombre y tarifa válidos.', 'error');
+                return;
+            }
+
+            db.config.zonas.push({ nombre, tarifa });
+            saveDb();
+            renderZonasAdminList();
+            renderDynamicZones();
+            nombreEl.value = '';
+            tarifaEl.value = '';
+            showToast('Zona común añadida localmente.');
+
+            await pushToCloud('ACTUALIZAR_CONFIG', db.config);
+        }
+
+        async function eliminarZonaComun(index) {
+            db.config.zonas.splice(index, 1);
+            saveDb();
+            renderZonasAdminList();
+            renderDynamicZones();
+            showToast('Zona común eliminada localmente.');
+
+            await pushToCloud('ACTUALIZAR_CONFIG', db.config);
+        }
+
+        function renderDynamicZones() {
+            const selectZona = document.getElementById('zonaComun');
+            if (!selectZona) return;
+            selectZona.innerHTML = '';
+            db.config.zonas.forEach(z => {
+                const opt = document.createElement('option');
+                opt.value = z.nombre;
+                opt.innerText = z.nombre;
+                selectZona.appendChild(opt);
+            });
+            actualizarInfoZona();
+        }
+
+        // --- AUTENTICACIÓN ---
+        function checkAuthentication() {
+            const session = sessionStorage.getItem('park_session');
+            const header = document.querySelector('header');
+            const main = document.querySelector('main');
+            const nav = document.querySelector('nav');
+            const loginSection = document.getElementById('loginSection');
+
+            if (session) {
+                activeUser = JSON.parse(session);
+                if (loginSection) loginSection.classList.add('hidden');
+                if (header) header.classList.remove('hidden');
+                if (main) main.classList.remove('hidden');
+                if (nav) nav.classList.remove('hidden');
+                updateNavbarForRole();
+                prefillForms();
+            } else {
+                if (loginSection) loginSection.classList.remove('hidden');
+                if (header) header.classList.add('hidden');
+                if (main) main.classList.add('hidden');
+                if (nav) nav.classList.add('hidden');
+            }
+        }
+
+        function prefillForms() {
+            if (activeUser && activeUser.rol === 'Propietario') {
+                const setAndDisable = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = val;
+                        el.disabled = true;
+                    }
+                };
+                setAndDisable('zonaBloque', activeUser.bloque);
+                setAndDisable('zonaApto', activeUser.apto);
+                setAndDisable('zonaNombre', activeUser.name);
+                setAndDisable('mudBloque', activeUser.bloque);
+                setAndDisable('mudApto', activeUser.apto);
+            } else {
+                const enableField = (id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.disabled = false;
+                };
+                enableField('zonaBloque');
+                enableField('zonaApto');
+                enableField('zonaNombre');
+                enableField('mudBloque');
+                enableField('mudApto');
+            }
+        }
+
+        function attemptLogin() {
+            const userIn = document.getElementById('loginUser').value.trim();
+            const passIn = document.getElementById('loginPassword').value.trim();
+
+            const user = db.usuarios.find(u => 
+                (u.username && u.username.toLowerCase() === userIn.toLowerCase()) || 
+                (u.email && u.email.toLowerCase() === userIn.toLowerCase())
+            );
+
+            if (user && user.pass === passIn) {
+                sessionStorage.setItem('park_session', JSON.stringify(user));
+                checkAuthentication(); 
+                showToast(`¡Bienvenido, ${user.name}!`);
+                registrarTurnoCelador('INGRESO_TURNO', user);
+
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPassword').value = '';
+            } else {
+                showToast('Credenciales de acceso incorrectas.', 'error');
+            }
+        }
+
+        function logout() {
+            if (activeUser) {
+                registrarTurnoCelador('SALIDA_TURNO', activeUser);
+            }
+            sessionStorage.removeItem('park_session');
+            activeUser = null;
+            checkAuthentication(); 
+            showToast('Sesión cerrada correctamente.', 'info');
+        }
+
+        function updateNavbarForRole() {
+            const badge = document.getElementById('roleBadge');
+            const adminTab = document.getElementById('btnNavConfig');
+            const btnNavParqueadero = document.getElementById('btnNavParqueadero');
+            const btnNavPaqueteria = document.getElementById('btnNavPaqueteria');
+            const btnSubZonasReservar = document.getElementById('btnSubZonasReservar');
+            const btnSubMudRegistrar = document.getElementById('btnSubMudRegistrar');
+
+            if (!badge || !adminTab) return;
+            if (!activeUser) return;
+            
+            badge.innerText = activeUser.rol;
+            
+            if (activeUser.rol === 'Administrador') {
+                badge.className = "bg-amber-500 text-slate-900 text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider";
+                adminTab.classList.remove('hidden');
+                btnNavParqueadero.classList.remove('hidden');
+                btnNavPaqueteria.classList.remove('hidden');
+                if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
+                if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
+                switchPanel('parqueadero');
+            } else if (activeUser.rol === 'Celador') {
+                badge.className = "bg-emerald-800 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
+                adminTab.classList.add('hidden');
+                btnNavParqueadero.classList.remove('hidden');
+                btnNavPaqueteria.classList.remove('hidden');
+                
+                // Restricción Celador: Solo ver Zonas y Mudanzas, no puede crear registros en ellas
+                if (btnSubZonasReservar) btnSubZonasReservar.classList.add('hidden');
+                if (btnSubMudRegistrar) btnSubMudRegistrar.classList.add('hidden');
+                switchPanel('parqueadero');
+                switchSubTab('zonas', 'calendario');
+                switchSubTab('mudanzas', 'porteria');
+            } else if (activeUser.rol === 'Propietario') {
+                badge.className = "bg-indigo-600 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
+                adminTab.classList.add('hidden');
+                
+                // Restricción Propietario: No ve parqueaderos ni paqueterías de portería
+                btnNavParqueadero.classList.add('hidden');
+                btnNavPaqueteria.classList.add('hidden');
+                
+                if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
+                if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
+                switchPanel('zonas');
+            }
+        }
+
+        // --- CONTROL DE PUSH & PULL CON LA NUBE ---
         async function pullFromCloud() {
             actualizarBadgeSincronizacion(true, "Cargando...");
             let timeoutId;
-            
             try {
-                // Previene que peticiones de red colgadas congelen la inicialización de la app
                 const controller = new AbortController();
                 timeoutId = setTimeout(() => controller.abort(), 6500); 
 
-                const response = await fetch(WEBHOOK_PULL_URL, {
+                const response = await fetch(webhookPull, {
                     method: 'GET',
                     signal: controller.signal
                 });
@@ -660,78 +1097,38 @@
                 if (response.ok) {
                     const cloudData = await response.json();
                     
-                    // Validar la estructura mínima devuelta por n8n desde el Google Sheet
-                    if (cloudData.usuarios || cloudData.registros || cloudData.config || cloudData.turnos) {
-                        if (cloudData.usuarios && Array.isArray(cloudData.usuarios)) {
-                            if (cloudData.usuarios.length === 0) {
-                                cloudData.usuarios = [
-                                    { name: 'Administrador General', username: 'admin', email: 'admin@conjunto.com', phone: '3001234567', rol: 'Administrador', pass: 'admin' }
-                                ];
-                            }
-                            db.usuarios = cloudData.usuarios;
+                    if (cloudData && typeof cloudData === 'object') {
+                        if (cloudData.usuarios && Array.isArray(cloudData.usuarios)) db.usuarios = cloudData.usuarios;
+                        if (cloudData.registros && Array.isArray(cloudData.registros)) db.registros = cloudData.registros;
+                        if (cloudData.reservas && Array.isArray(cloudData.reservas)) db.reservas = cloudData.reservas;
+                        if (cloudData.mudanzas && Array.isArray(cloudData.mudanzas)) db.mudanzas = cloudData.mudanzas;
+                        if (cloudData.paquetes && Array.isArray(cloudData.paquetes)) db.paquetes = cloudData.paquetes;
+                        if (cloudData.config && typeof cloudData.config === 'object') {
+                            db.config = Object.assign({}, db.config, cloudData.config);
                         }
                         
-                        // Sincronizar el log de turnos desde el Sheet
-                        if (cloudData.turnos && Array.isArray(cloudData.turnos)) {
-                            db.turnos = cloudData.turnos;
-                        }
-                        
-                        // DE-DUPLICACIÓN: Filtramos los registros por ID único para evitar que se dupliquen visualmente en móviles
-                        if (cloudData.registros && Array.isArray(cloudData.registros)) {
-                            const registrosUnicos = [];
-                            const idsVistos = new Set();
-                            cloudData.registros.forEach(reg => {
-                                if (reg && reg.id && !idsVistos.has(reg.id)) {
-                                    idsVistos.add(reg.id);
-                                    registrosUnicos.push(reg);
-                                }
-                            });
-                            db.registros = registrosUnicos;
-                        }
-                        
-                        if (cloudData.config) {
-                            db.config.tarifaCarro = cloudData.config.tarifaCarro || db.config.tarifaCarro;
-                            db.config.tarifaMoto = cloudData.config.tarifaMoto || db.config.tarifaMoto;
-                            db.config.correoDestino = cloudData.config.correoDestino || db.config.correoDestino;
-                            db.config.horasGratisHabilitadas = cloudData.config.horasGratisHabilitadas === true || cloudData.config.horasGratisHabilitadas === 'true';
-                            db.config.horasGratisCantidad = parseFloat(cloudData.config.horasGratisCantidad) || 0;
-                            
-                            // Actualizar inputs del admin
-                            if (document.getElementById('tarifaCarro')) {
-                                document.getElementById('tarifaCarro').value = db.config.tarifaCarro;
-                                document.getElementById('tarifaMoto').value = db.config.tarifaMoto;
-                                document.getElementById('correoDestino').value = db.config.correoDestino;
-                                document.getElementById('horasGratisHabilitadas').checked = db.config.horasGratisHabilitadas;
-                                document.getElementById('horasGratisCantidad').value = db.config.horasGratisCantidad;
-                                toggleHorasGratisInput();
-                            }
-                        }
-                        
+                        sanitizeDb();
                         saveDb();
+                        
                         renderActivos();
                         renderCeladoresList();
-                        renderFiltrosTurnos(); // Actualizar el select de celadores
-                        renderTurnos(); // Pintar logs de entrada y salida
+                        renderZonasAdminList();
+                        renderReservas();
+                        renderMudanzas();
+                        renderPaquetes();
+                        renderDynamicZones();
+
                         actualizarBadgeSincronizacion(true, "Nube OK");
-                        showToast("Sincronización con Google Sheets completada exitosamente.");
-                    } else {
-                        actualizarBadgeSincronizacion(false, "Error de Datos");
-                        console.error("La respuesta de n8n no tiene el formato esperado:", cloudData);
                     }
                 } else {
                     actualizarBadgeSincronizacion(false, "Error Servidor");
-                    showToast("No se pudo obtener datos del servidor. Usando datos locales.", "error");
                 }
             } catch (err) {
                 if (timeoutId) clearTimeout(timeoutId);
-                console.warn("La sincronización de n8n requiere configuración de cabeceras CORS:", err);
                 actualizarBadgeSincronizacion(false, "Offline");
-                showToast("Sincronización de n8n no disponible. Usando respaldo de base local.", "info");
             }
         }
 
-        // --- STREAMING_CHUNK: Lógica para enviar eventos de escritura a n8n ---
-        // 2. Enviar evento en tiempo real a Google Sheets (PUSH)
         async function pushToCloud(actionType, actionData) {
             try {
                 const payload = {
@@ -744,27 +1141,19 @@
                     }
                 };
 
-                const response = await fetch(WEBHOOK_PUSH_URL, {
+                const response = await fetch(webhookPush, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (response.ok) {
-                    console.log(`Evento ${actionType} guardado exitosamente en Google Sheets.`);
-                    return true;
-                } else {
-                    console.error("n8n retornó un código de error de respuesta.");
-                    return false;
-                }
+                return response.ok;
             } catch (err) {
-                console.error("Error al transmitir datos a n8n (Verificar CORS en n8n):", err);
+                console.warn("Offline - datos guardados en cola local", err);
                 return false;
             }
         }
 
-        // --- STREAMING_CHUNK: Registro de auditoría de turnos y marcaciones ---
-        // 3. Auditoría de Turnos (Entrada/Salida de Celador)
         async function registrarTurnoCelador(actionType, user) {
             const shiftRecord = {
                 id: 'SHIFT-' + Date.now(),
@@ -773,53 +1162,818 @@
                 email: user.email,
                 phone: user.phone,
                 rol: user.rol,
-                timestamp: new Date().toISOString(), // Enviamos en ISO UTC
+                timestamp: new Date().toISOString(),
                 evento: actionType === 'INGRESO_TURNO' ? 'Entrada Turno' : 'Salida Turno'
             };
+            await pushToCloud(actionType, shiftRecord);
+        }
 
-            // Guardar localmente también para que el admin lo visualice de inmediato
-            if (!db.turnos) db.turnos = [];
-            db.turnos.push(shiftRecord);
+        function actualizarBadgeSincronizacion(exito, text) {
+            const el = document.getElementById('syncStatusBadge');
+            const txt = document.getElementById('syncStatusText');
+            if (!el || !txt) return;
+            if (exito) {
+                el.className = "cursor-pointer text-[10px] bg-emerald-800 text-emerald-200 px-2 py-1 rounded-lg flex items-center gap-1 font-semibold";
+                txt.innerText = text || "Nube OK";
+            } else {
+                el.className = "cursor-pointer text-[10px] bg-rose-800 text-rose-200 px-2 py-1 rounded-lg flex items-center gap-1 font-semibold";
+                txt.innerText = text || "Offline";
+            }
+        }
+
+        function forzarSincronizacion() {
+            pullFromCloud();
+        }
+
+        // --- PARQUEADEROS ---
+        async function registrarIngreso(event) {
+            event.preventDefault();
+            if (!canvasRefs['firmaIngresoCanvas'].hasSignature) {
+                showToast('Por favor, solicite la firma del conductor antes de registrar el ingreso.', 'error');
+                return;
+            }
+
+            const tipo = document.querySelector('input[name="tipoVehiculo"]:checked').value;
+            const placa = document.getElementById('placa').value.toUpperCase().trim();
+            const bloque = document.getElementById('bloque').value.trim();
+            const apartamento = document.getElementById('apartamento').value.trim();
+            const autoriza = document.getElementById('autoriza').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const firmaB64 = canvasRefs['firmaIngresoCanvas'].canvas.toDataURL();
+
+            const yaAdentro = db.registros.some(r => r.placa === placa && r.estado === 'Dentro');
+            if (yaAdentro) {
+                showToast(`El vehículo con placa ${placa} ya registra ingreso activo.`, 'error');
+                return;
+            }
+
+            const nuevoRegistro = {
+                id: 'REG-' + Date.now(),
+                tipo, placa, bloque, apartamento, autoriza, telefono,
+                horaIngreso: new Date().toISOString(),
+                firmaIngreso: firmaB64,
+                horaSalida: null, firmaSalida: null,
+                estado: 'Dentro', costo: 0
+            };
+
+            db.registros.push(nuevoRegistro);
             saveDb();
-            renderTurnos();
+            renderActivos();
+            showToast('Ingreso registrado localmente.');
 
-            const pushExitoso = await pushToCloud(actionType, shiftRecord);
-            if (pushExitoso) {
-                console.log(`Turno (${actionType}) enviado a Google Sheets.`);
-            } else {
-                console.warn(`No se pudo sincronizar el turno (${actionType}) en tiempo real.`);
-            }
-        }
-
-        function actualizarBadgeSincronizacion(conectado, textoText) {
-            const badge = document.getElementById('syncStatusBadge');
-            const textSpan = document.getElementById('syncStatusText');
+            await pushToCloud('REGISTRAR_INGRESO', nuevoRegistro);
             
-            if (conectado) {
-                badge.className = "cursor-pointer text-[10px] bg-emerald-800 text-emerald-100 px-2 py-1 rounded-lg flex items-center gap-1 font-semibold";
-                textSpan.innerText = textoText || "Nube OK";
+            document.getElementById('ingresoForm').reset();
+            clearCanvas('firmaIngresoCanvas');
+            switchSubTab('parqueadero', 'activos');
+        }
+
+        function renderActivos() {
+            const listContainer = document.getElementById('listaActivos');
+            if (!listContainer) return;
+            const activos = db.registros.filter(r => r.estado === 'Dentro');
+            
+            const countEl = document.getElementById('activosCount');
+            if (countEl) countEl.innerText = `${activos.length} En Sitio`;
+            
+            listContainer.innerHTML = '';
+            if (activos.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2">
+                        <i class="fa-solid fa-face-smile text-4xl text-slate-300"></i>
+                        <p class="text-sm">No hay vehículos de visitantes adentro.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            activos.forEach(reg => {
+                const badgeColor = reg.tipo === 'Carro' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700';
+                const icon = reg.tipo === 'Carro' ? 'fa-car' : 'fa-motorcycle';
+                const formatTime = new Date(reg.horaIngreso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center space-x-3">
+                            <span class="${badgeColor} p-2 rounded-lg text-lg">
+                                <i class="fa-solid ${icon}"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-mono font-black text-slate-800 text-lg">${reg.placa}</h3>
+                                <p class="text-xs text-slate-500 font-semibold">Bloque ${reg.bloque} - Apto ${reg.apartamento}</p>
+                            </div>
+                        </div>
+                        <span class="bg-emerald-50 text-emerald-700 text-[10px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+                            Entrada: ${formatTime}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs border-t pt-2 text-slate-600">
+                        <div><strong class="text-slate-500">Autoriza:</strong> <span class="font-medium">${reg.autoriza}</span></div>
+                        <!-- Botones de contacto directo para Celador -->
+                        <div class="flex gap-1">
+                            <a href="tel:${reg.telefono}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <button onclick="abrirSalidaModal('${reg.id}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition tracking-wide flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-amber-300"></i> Registrar Salida / Cobro
+                    </button>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // --- SALIDAS PARQUEADERO ---
+        function abrirSalidaModal(id) {
+            activeCheckoutId = id;
+            const reg = db.registros.find(r => r.id === id);
+            if (!reg) return;
+
+            const entryDate = new Date(reg.horaIngreso);
+            const exitDate = new Date();
+
+            const durationMs = exitDate - entryDate;
+            const totalMinutes = Math.floor(durationMs / (1000 * 60));
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const hoursToCharge = Math.ceil(durationMs / (1000 * 60 * 60)) || 1; 
+
+            const rate = reg.tipo === 'Carro' ? db.config.tarifaCarro : db.config.tarifaMoto;
+            const cost = hoursToCharge * rate;
+
+            const setInnerText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = text;
+            };
+
+            setInnerText('checkoutPlaca', reg.placa);
+            setInnerText('checkoutIngreso', entryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + entryDate.toLocaleDateString() + ')');
+            setInnerText('checkoutDuracion', `${hours}h ${minutes}m (Cobro: ${hoursToCharge}h)`);
+            
+            const formattedCost = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(cost);
+            setInnerText('checkoutCosto', formattedCost);
+
+            reg.tmpCosto = cost;
+            reg.tmpHoraSalida = exitDate.toISOString();
+            reg.tmpDuracionTxt = `${hours} horas y ${minutes} minutos`;
+
+            const modal = document.getElementById('salidaModal');
+            if (modal) modal.classList.remove('hidden');
+            setTimeout(() => setupCanvas('firmaSalidaCanvas'), 150);
+        }
+
+        function closeSalidaModal() {
+            document.getElementById('salidaModal').classList.add('hidden');
+            clearCanvas('firmaSalidaCanvas');
+            activeCheckoutId = null;
+        }
+
+        async function completarSalida() {
+            if (!activeCheckoutId) return;
+            if (!canvasRefs['firmaSalidaCanvas'].hasSignature) {
+                showToast('Se requiere la firma para certificar la salida.', 'error');
+                return;
+            }
+
+            const reg = db.registros.find(r => r.id === activeCheckoutId);
+            if (!reg) return;
+
+            const firmaSalidaB64 = canvasRefs['firmaSalidaCanvas'].canvas.toDataURL();
+
+            reg.horaSalida = reg.tmpHoraSalida;
+            reg.costo = reg.tmpCosto;
+            reg.firmaSalida = firmaSalidaB64;
+            reg.estado = 'Completado';
+
+            const duracionFinal = reg.tmpDuracionTxt;
+            delete reg.tmpCosto;
+            delete reg.tmpHoraSalida;
+            delete reg.tmpDuracionTxt;
+
+            saveDb();
+            renderActivos();
+            closeSalidaModal();
+            showToast('Salida completada localmente.');
+
+            const datosParaEnvio = {
+                ...reg,
+                duracion: duracionFinal,
+                costoFormateado: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reg.costo),
+                correoDestino: db.config.correoDestino
+            };
+
+            await pushToCloud('REGISTRAR_SALIDA', datosParaEnvio);
+        }
+
+        // --- MÓDULO 2: RESERVAS ZONAS COMUNES ---
+        function toggleMetodoPago(metodo) {
+            const labelSoporte = document.getElementById('labelPagoSoporte');
+            const labelFactura = document.getElementById('labelPagoFactura');
+            const contenedorSoporte = document.getElementById('contenedorSoportePago');
+
+            if (metodo === 'Soporte') {
+                if (labelSoporte) labelSoporte.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-800";
+                if (labelFactura) labelFactura.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-slate-200 text-slate-500";
+                if (contenedorSoporte) contenedorSoporte.classList.remove('hidden');
             } else {
-                badge.className = "cursor-pointer text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded-lg flex items-center gap-1 font-semibold animate-pulse";
-                textSpan.innerText = textoText || "Modo Local";
+                if (labelFactura) labelFactura.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold";
+                if (labelSoporte) labelSoporte.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-slate-200 text-slate-500";
+                if (contenedorSoporte) contenedorSoporte.classList.add('hidden');
             }
         }
 
-        async function forzarSincronizacion() {
-            await pullFromCloud();
+        function actualizarInfoZona() {
+            const selectZona = document.getElementById('zonaComun');
+            if (!selectZona) return;
+            const zonaNombre = selectZona.value;
+            const zona = db.config.zonas.find(z => z.nombre === zonaNombre);
+            const tarifa = zona ? zona.tarifa : 0;
+            const formattedTarifa = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(tarifa);
+            const infoEl = document.getElementById('infoZonaTarifa');
+            if (infoEl) infoEl.innerText = `Costo: ${formattedTarifa} COP`;
         }
 
-        // --- STREAMING_CHUNK: Lógica de inicialización y dibujado del Canvas para firmas ---
-        // --- MANEJO DE FIRMA DIGITAL (CANVAS) ---
+        async function registrarReserva(event) {
+            event.preventDefault();
+            if (!activeUser) return;
+
+            const zona = document.getElementById('zonaComun').value;
+            
+            // Auto-relleno de datos del Propietario en sesión
+            const bloque = activeUser.rol === 'Propietario' ? activeUser.bloque : document.getElementById('zonaBloque').value.trim();
+            const apto = activeUser.rol === 'Propietario' ? activeUser.apto : document.getElementById('zonaApto').value.trim();
+            const nombre = activeUser.rol === 'Propietario' ? activeUser.name : document.getElementById('zonaNombre').value.trim();
+            
+            const fecha = document.getElementById('zonaFecha').value;
+            const hora = document.getElementById('zonaHora').value;
+            const metodo = document.querySelector('input[name="zonaMetodoPago"]:checked').value;
+            
+            const compInput = document.getElementById('zonaComprobante');
+            let b64Comprobante = null;
+
+            if (metodo === 'Soporte' && compInput && compInput.files.length > 0) {
+                b64Comprobante = await encodeFileToBase64(compInput.files[0]);
+            }
+
+            const nuevaReserva = {
+                id: 'RES-' + Date.now(),
+                zona, bloque, apto, nombre, fecha, hora, metodo,
+                comprobante: b64Comprobante,
+                telefono: activeUser.phone,  // Captura para contacto directo
+                email: activeUser.email,      // Captura para contacto directo
+                estado: 'Pendiente',
+                timestamp: new Date().toISOString()
+            };
+
+            db.reservas.unshift(nuevaReserva);
+            saveDb();
+            renderReservas();
+            showToast('Reserva agendada localmente.');
+
+            await pushToCloud('REGISTRAR_RESERVA', nuevaReserva);
+            
+            document.getElementById('reservaForm').reset();
+            prefillForms();
+            switchSubTab('zonas', 'calendario');
+        }
+
+        function renderReservas() {
+            const container = document.getElementById('listaReservas');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!activeUser) return;
+
+            // Filtrado: Si es Propietario, solo ve sus propias reservas
+            const listado = activeUser.rol === 'Propietario' ? 
+                db.reservas.filter(r => r.bloque === activeUser.bloque && r.apto === activeUser.apto) : 
+                db.reservas;
+
+            if (listado.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2 text-xs">
+                        <i class="fa-solid fa-calendar text-4xl text-slate-300"></i>
+                        <p class="text-sm">No hay reservas registradas.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listado.forEach(res => {
+                const badgeColor = res.estado === 'Aprobado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+                
+                // Buscar tarifa dinámica
+                const zonaConfig = db.config.zonas.find(z => z.nombre === res.zona);
+                const tarifa = zonaConfig ? zonaConfig.tarifa : 0;
+                const costText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(tarifa);
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm space-y-2 text-xs";
+                
+                // Enlaces directos de contacto para el celador
+                let contactoHtml = '';
+                if (activeUser.rol === 'Celador' || activeUser.rol === 'Administrador') {
+                    contactoHtml = `
+                        <div class="flex gap-1 pt-1.5 border-t border-slate-100 mt-2">
+                            <a href="tel:${res.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
+                                <i class="fa-solid fa-phone"></i> Llamar
+                            </a>
+                            <a href="mailto:${res.email || ''}?subject=Sobre tu reserva de ${res.zona}" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
+                                <i class="fa-solid fa-envelope"></i> Correo
+                            </a>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <strong class="text-slate-800 text-sm">${res.zona} (${costText})</strong>
+                        <span class="${badgeColor} px-2 py-0.5 rounded font-bold uppercase text-[9px]">${res.estado}</span>
+                    </div>
+                    <div class="text-slate-600 space-y-0.5">
+                        <div><strong>Residente:</strong> ${res.nombre} (Bloque ${res.bloque} - Apt ${res.apto})</div>
+                        <div><strong>Uso:</strong> ${res.fecha} a las ${res.hora}</div>
+                        <div><strong>Pago:</strong> ${res.metodo === 'Soporte' ? 'Recibo Adjunto' : 'Cargar a Factura'}</div>
+                    </div>
+                    ${contactoHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- MÓDULO 3: MUDANZAS Y TRASTEOS ---
+        async function registrarMudanza(event) {
+            event.preventDefault();
+            if (!activeUser) return;
+
+            const bloque = activeUser.rol === 'Propietario' ? activeUser.bloque : document.getElementById('mudBloque').value.trim();
+            const apto = activeUser.rol === 'Propietario' ? activeUser.apto : document.getElementById('mudApto').value.trim();
+            
+            const fecha = document.getElementById('mudFecha').value;
+            const hora = document.getElementById('mudHora').value;
+            const empresa = document.getElementById('mudEmpresa').value.trim();
+            const placa = document.getElementById('mudPlaca').value.trim().toUpperCase();
+            const tipo = document.getElementById('mudTipo').value;
+            const operarios = document.getElementById('mudOperarios').value.trim();
+
+            const esPazYSalvo = (parseInt(apto) % 3 !== 0); 
+
+            const nuevaMudanza = {
+                id: 'MUD-' + Date.now(),
+                bloque, apto, fecha, hora, empresa, placa, tipo, operarios,
+                pazYSalvo: esPazYSalvo,
+                telefono: activeUser.phone,  // Celador contact
+                email: activeUser.email,      // Celador contact
+                estado: esPazYSalvo ? 'Autorizado' : 'Bloqueado por Cartera',
+                timestamp: new Date().toISOString()
+            };
+
+            db.mudanzas.unshift(nuevaMudanza);
+            saveDb();
+            renderMudanzas();
+            showToast('Mudanza agendada localmente.');
+
+            await pushToCloud('REGISTRAR_MUDANZA', nuevaMudanza);
+            
+            document.getElementById('mudanzaForm').reset();
+            prefillForms();
+            switchSubTab('mudanzas', 'porteria');
+        }
+
+        function renderMudanzas() {
+            const container = document.getElementById('listaMudanzas');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!activeUser) return;
+
+            // Filtrado: Si es Propietario, solo ve sus mudanzas
+            const listado = activeUser.rol === 'Propietario' ? 
+                db.mudanzas.filter(m => m.bloque === activeUser.bloque && m.apto === activeUser.apto) : 
+                db.mudanzas;
+
+            if (listado.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2 text-xs">
+                        <i class="fa-solid fa-truck-moving text-4xl text-slate-300"></i>
+                        <p class="text-sm">No hay mudanzas programadas.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listado.forEach(mud => {
+                const badgeColor = mud.pazYSalvo ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                const statusIcon = mud.pazYSalvo ? 'fa-circle-check text-emerald-500' : 'fa-circle-xmark text-rose-500';
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm space-y-2 text-xs";
+                
+                let contactoHtml = '';
+                if (activeUser.rol === 'Celador' || activeUser.rol === 'Administrador') {
+                    contactoHtml = `
+                        <div class="flex gap-1 pt-1.5 border-t border-slate-100 mt-2">
+                            <a href="tel:${mud.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
+                                <i class="fa-solid fa-phone"></i> Llamar
+                            </a>
+                            <a href="mailto:${mud.email || ''}?subject=Sobre tu mudanza programada" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
+                                <i class="fa-solid fa-envelope"></i> Correo
+                            </a>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-1.5">
+                        <strong class="text-slate-800 text-sm">Mudanza de ${mud.tipo}</strong>
+                        <span class="${badgeColor} px-2 py-0.5 rounded font-bold uppercase text-[9px]">${mud.estado}</span>
+                    </div>
+                    <div class="text-slate-600 space-y-1">
+                        <div><strong>Ubicación:</strong> Bloque ${mud.bloque} - Apt ${mud.apto}</div>
+                        <div><strong>Programado:</strong> ${mud.fecha} a las ${mud.hora}</div>
+                        <div><strong>Empresa / Camión:</strong> ${mud.empresa} (${mud.placa})</div>
+                        <div><strong>Operarios:</strong> <span class="text-slate-500 font-mono">${mud.operarios}</span></div>
+                        <div class="flex items-center gap-1.5 pt-1">
+                            <i class="fa-solid ${statusIcon}"></i>
+                            <span class="font-bold uppercase text-[10px]">${mud.pazYSalvo ? 'Paz y Salvo Confirmado' : 'Pendiente de Cartera'}</span>
+                        </div>
+                    </div>
+                    ${contactoHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- MÓDULO 4: PAQUETERÍA ---
+        async function procesarFotoPaquete(event) {
+            const file = event.target.files[0];
+            const estadoSpan = document.getElementById('paqFotoEstado');
+            const previewImg = document.getElementById('paqFotoPreview');
+            if (file) {
+                if (estadoSpan) estadoSpan.innerText = file.name;
+                b64FotoPaquete = await encodeFileToBase64(file);
+                if (previewImg) {
+                    previewImg.src = b64FotoPaquete;
+                    previewImg.classList.remove('hidden');
+                }
+            }
+        }
+
+        async function registrarPaquete(event) {
+            event.preventDefault();
+            const bloque = document.getElementById('paqBloque').value.trim();
+            const apto = document.getElementById('paqApto').value.trim();
+            const destinatario = document.getElementById('paqDestinatario').value.trim();
+            const courier = document.getElementById('paqCourier').value;
+
+            // Encontrar email y teléfono del propietario de ese apartamento si ya existe
+            const prop = db.usuarios.find(u => 
+                u.rol === 'Propietario' && 
+                u.bloque.toLowerCase() === bloque.toLowerCase() && 
+                u.apto.toLowerCase() === apto.toLowerCase()
+            );
+
+            if (!activeUser) return;
+
+            const nuevoPaquete = {
+                id: 'PAQ-' + Date.now(),
+                bloque, apto, destinatario, courier,
+                foto: b64FotoPaquete,
+                estado: 'Pendiente',
+                telefono: prop ? prop.phone : '',
+                email: prop ? prop.email : '',
+                fechaRecibido: new Date().toISOString(),
+                fechaEntregado: null, firmaRetiro: null
+            };
+
+            db.paquetes.unshift(nuevoPaquete);
+            saveDb();
+            renderPaquetes();
+            showToast('Paquete registrado localmente.');
+
+            await pushToCloud('REGISTRAR_PAQUETE', nuevoPaquete);
+
+            document.getElementById('paqueteForm').reset();
+            b64FotoPaquete = null;
+            document.getElementById('paqFotoEstado').innerText = "Sin foto";
+            document.getElementById('paqFotoPreview').classList.add('hidden');
+            switchSubTab('paqueteria', 'inventario');
+        }
+
+        function renderPaquetes() {
+            const container = document.getElementById('listaPaquetes');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!activeUser) return;
+
+            const pendientes = db.paquetes.filter(p => p.estado === 'Pendiente');
+            if (pendientes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2 text-xs">
+                        <i class="fa-solid fa-box-archive text-4xl text-slate-300"></i>
+                        <p class="text-sm">No hay paquetes pendientes de entrega.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            pendientes.forEach(paq => {
+                const formatTime = new Date(paq.fechaRecibido).toLocaleDateString() + ' ' + new Date(paq.fechaRecibido).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm space-y-3 text-xs";
+                
+                let imgHtml = '';
+                if (paq.foto) {
+                    imgHtml = `<img class="h-20 rounded shadow-sm border mt-1.5" src="${paq.foto}" alt="Etiqueta">`;
+                }
+
+                let contactoHtml = '';
+                if (activeUser.rol === 'Celador' || activeUser.rol === 'Administrador') {
+                    contactoHtml = `
+                        <div class="flex gap-1 pt-1 border-t border-slate-100">
+                            <a href="tel:${paq.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
+                                <i class="fa-solid fa-phone"></i> Llamar
+                            </a>
+                            <a href="mailto:${paq.email || ''}?subject=Paquete pendiente en portería" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
+                                <i class="fa-solid fa-envelope"></i> Correo
+                            </a>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <strong class="text-xs font-bold text-indigo-900 bg-indigo-50 px-2 py-1 rounded">Apt ${paq.apto}</strong>
+                            <span class="text-xs font-semibold text-slate-500 ml-1">${paq.courier}</span>
+                        </div>
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">Pendiente</span>
+                    </div>
+                    <div class="text-slate-600 space-y-1">
+                        <div>Para: <strong class="text-slate-700">${paq.destinatario}</strong></div>
+                        <div class="text-[10px] text-slate-400">Llegó: ${formatTime}</div>
+                        ${imgHtml}
+                    </div>
+                    ${contactoHtml}
+                    <button onclick="abrirEntregaPaqueteModal('${paq.id}')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-signature"></i> Firmar y Entregar
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function abrirEntregaPaqueteModal(id) {
+            activeEntregaPaqueteId = id;
+            const paq = db.paquetes.find(p => p.id === id);
+            if (!paq) return;
+
+            document.getElementById('entregaApt').innerText = `Apt ${paq.apto}`;
+            document.getElementById('entregaDest').innerText = paq.destinatario;
+            document.getElementById('entregaCourier').innerText = paq.courier;
+
+            const modal = document.getElementById('entregaPaqueteModal');
+            if (modal) modal.classList.remove('hidden');
+            setTimeout(() => setupCanvas('firmaEntregaCanvas'), 150);
+        }
+
+        function closeEntregaModal() {
+            document.getElementById('entregaPaqueteModal').classList.add('hidden');
+            clearCanvas('firmaEntregaCanvas');
+            activeEntregaPaqueteId = null;
+        }
+
+        async function completarEntregaPaquete() {
+            if (!activeEntregaPaqueteId) return;
+            if (!canvasRefs['firmaEntregaCanvas'].hasSignature) {
+                showToast('Se requiere la firma para registrar el retiro.', 'error');
+                return;
+            }
+
+            const paq = db.paquetes.find(p => p.id === activeEntregaPaqueteId);
+            if (!paq) return;
+
+            const firmaB64 = canvasRefs['firmaEntregaCanvas'].canvas.toDataURL();
+
+            paq.estado = 'Entregado';
+            paq.fechaEntregado = new Date().toISOString();
+            paq.firmaRetiro = firmaB64;
+
+            saveDb();
+            renderPaquetes();
+            closeEntregaModal();
+            showToast('Paquete entregado correctamente.');
+
+            await pushToCloud('ENTREGAR_PAQUETE', paq);
+        }
+
+        // --- SISTEMA DE CONFIGURACIÓN DINÁMICA ---
+        async function guardarConfiguracion() {
+            db.config.tarifaCarro = parseInt(document.getElementById('tarifaCarro').value) || 3000;
+            db.config.tarifaMoto = parseInt(document.getElementById('tarifaMoto').value) || 1500;
+            db.config.correoDestino = document.getElementById('correoDestino').value.trim();
+
+            saveDb();
+            showToast('Configuración del conjunto guardada.');
+
+            await pushToCloud('ACTUALIZAR_CONFIG', db.config);
+        }
+
+        function renderCeladoresList() {
+            const list = document.getElementById('listaCeladores');
+            if (!list) return;
+            list.innerHTML = '';
+            db.usuarios.forEach(c => {
+                const isClientAdmin = c.rol === 'Administrador';
+                const isPropietario = c.rol === 'Propietario';
+                const icon = isClientAdmin ? 'fa-user-gear text-amber-500' : (isPropietario ? 'fa-home text-indigo-500' : 'fa-user-shield text-slate-400');
+                const badgeStyle = isClientAdmin ? 'bg-amber-100 text-amber-800' : (isPropietario ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-700');
+
+                const li = document.createElement('li');
+                li.className = "flex justify-between items-center py-3 text-sm";
+                li.innerHTML = `
+                    <div class="flex-1 min-w-0 pr-2">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid ${icon}"></i>
+                            <span class="font-semibold text-slate-800 truncate">${c.name}</span>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${badgeStyle}">${c.rol}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 mt-1 space-y-0.5">
+                            <div><span class="font-medium text-slate-400">Usuario:</span> <span class="font-mono text-slate-700">${c.username}</span></div>
+                            ${isPropietario ? `<div><span class="font-medium text-slate-400">Ubicación:</span> Blq ${c.bloque} - Apt ${c.apto}</div>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="eliminarUsuario('${c.username}')" class="text-rose-500 hover:text-rose-700 p-1 flex-shrink-0">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        async function eliminarUsuario(username) {
+            if (username === 'admin' || username === 'celador') {
+                showToast('No se pueden borrar las cuentas maestras.', 'error');
+                return;
+            }
+            if (activeUser && activeUser.username === username) {
+                showToast('No puedes borrar la sesión actual.', 'error');
+                return;
+            }
+
+            db.usuarios = db.usuarios.filter(u => u.username !== username);
+            saveDb();
+            renderCeladoresList();
+            showToast('Usuario removido localmente.');
+
+            await pushToCloud('ELIMINAR_USUARIO', {
+                usuariosActualizados: db.usuarios,
+                usuarioEliminadoUsername: username
+            });
+        }
+
+        // --- SISTEMA DE PANELES ---
+        function switchPanel(panelName) {
+            if (panelName === 'config') {
+                if (!activeUser || activeUser.rol !== 'Administrador') {
+                    showToast('Acceso restringido a administradores.', 'error');
+                    return;
+                }
+            }
+
+            const panels = document.querySelectorAll('.app-panel');
+            panels.forEach(p => p.classList.add('hidden'));
+
+            const buttons = [
+                { id: 'btnNavParqueadero', key: 'parqueadero' },
+                { id: 'btnNavZonas', key: 'zonas' },
+                { id: 'btnNavMudanzas', key: 'mudanzas' },
+                { id: 'btnNavPaqueteria', key: 'paqueteria' },
+                { id: 'btnNavConfig', key: 'config' }
+            ];
+
+            buttons.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (el) el.className = "flex-1 py-3 flex flex-col items-center text-slate-400";
+            });
+
+            const activeBtn = buttons.find(b => b.key === panelName);
+            if (activeBtn) {
+                const el = document.getElementById(activeBtn.id);
+                if (el) el.className = "flex-1 py-3 flex flex-col items-center text-emerald-600 font-bold";
+            }
+
+            if (panelName === 'parqueadero') {
+                document.getElementById('panelParqueadero').classList.remove('hidden');
+                renderActivos();
+            } else if (panelName === 'zonas') {
+                document.getElementById('panelZonas').classList.remove('hidden');
+                renderReservas();
+            } else if (panelName === 'mudanzas') {
+                document.getElementById('panelMudanzas').classList.remove('hidden');
+                renderMudanzas();
+            } else if (panelName === 'paqueteria') {
+                document.getElementById('panelPaqueteria').classList.remove('hidden');
+                renderPaquetes();
+            } else if (panelName === 'config') {
+                document.getElementById('panelConfig').classList.remove('hidden');
+            }
+        }
+
+        function switchSubTab(modulo, targetTab) {
+            if (modulo === 'parqueadero') {
+                const subIngresar = document.getElementById('subParqIngresar');
+                const subActivos = document.getElementById('subParqActivos');
+                const btnIngresar = document.getElementById('btnSubParqIngresar');
+                const btnActivos = document.getElementById('btnSubParqActivos');
+
+                subIngresar.classList.add('hidden');
+                subActivos.classList.add('hidden');
+                btnIngresar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+                btnActivos.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+
+                if (targetTab === 'ingresar') {
+                    subIngresar.classList.remove('hidden');
+                    btnIngresar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                } else {
+                    subActivos.classList.remove('hidden');
+                    btnActivos.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                }
+            } else if (modulo === 'zonas') {
+                const subReservar = document.getElementById('subZonasReservar');
+                const subCalendario = document.getElementById('subZonasCalendario');
+                const btnReservar = document.getElementById('btnSubZonasReservar');
+                const btnCalendario = document.getElementById('btnSubZonasCalendario');
+
+                subReservar.classList.add('hidden');
+                subCalendario.classList.add('hidden');
+                btnReservar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+                btnCalendario.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+
+                if (targetTab === 'reservar') {
+                    subReservar.classList.remove('hidden');
+                    btnReservar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                } else {
+                    subCalendario.classList.remove('hidden');
+                    btnCalendario.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                }
+            } else if (modulo === 'mudanzas') {
+                const subRegistrar = document.getElementById('subMudanzasRegistrar');
+                const subPorteria = document.getElementById('subMudanzasPorteria');
+                const btnRegistrar = document.getElementById('btnSubMudRegistrar');
+                const btnPorteria = document.getElementById('btnSubMudPorteria');
+
+                subRegistrar.classList.add('hidden');
+                subPorteria.classList.add('hidden');
+                btnRegistrar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+                btnPorteria.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+
+                if (targetTab === 'registrar') {
+                    subRegistrar.classList.remove('hidden');
+                    btnRegistrar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                } else {
+                    subPorteria.classList.remove('hidden');
+                    btnPorteria.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                }
+            } else if (modulo === 'paqueteria') {
+                const subIngresar = document.getElementById('subPaqueteriaIngresar');
+                const subInventario = document.getElementById('subPaqueteriaInventario');
+                const btnIngresar = document.getElementById('btnSubPaqIngresar');
+                const btnInventario = document.getElementById('btnSubPaqInventario');
+
+                subIngresar.classList.add('hidden');
+                subInventario.classList.add('hidden');
+                btnIngresar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+                btnInventario.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800";
+
+                if (targetTab === 'ingresar') {
+                    subIngresar.classList.remove('hidden');
+                    btnIngresar.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                } else {
+                    subInventario.classList.remove('hidden');
+                    btnInventario.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50";
+                }
+            }
+        }
+
+        // --- SISTEMA DE LIENZO (CANVAS) ---
         const canvasRefs = {};
-        
         function setupCanvas(canvasId) {
             const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
             let drawing = false;
 
             function resizeCanvas() {
-                const rect = canvas.parentNode.getBoundingClientRect();
-                canvas.width = rect.width;
+                const parent = canvas.parentNode;
+                const rect = parent ? parent.getBoundingClientRect() : { width: 300 };
+                canvas.width = rect.width || 300;
                 canvas.height = 128; 
                 ctx.strokeStyle = '#0f172a';
                 ctx.lineWidth = 3.5;
@@ -829,43 +1983,34 @@
 
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-
             canvasRefs[canvasId] = { canvas, ctx, hasSignature: false };
 
-            // Soporte Ratón
             canvas.addEventListener('mousedown', (e) => {
                 drawing = true;
                 ctx.beginPath();
                 ctx.moveTo(getPointerPos(canvas, e).x, getPointerPos(canvas, e).y);
             });
-
             canvas.addEventListener('mousemove', (e) => {
                 if (!drawing) return;
                 ctx.lineTo(getPointerPos(canvas, e).x, getPointerPos(canvas, e).y);
                 ctx.stroke();
                 canvasRefs[canvasId].hasSignature = true;
             });
-
             window.addEventListener('mouseup', () => drawing = false);
 
-            // Soporte Táctil (Móvil)
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 drawing = true;
                 ctx.beginPath();
-                const touch = e.touches[0];
-                ctx.moveTo(getPointerPos(canvas, touch).x, getPointerPos(canvas, touch).y);
+                ctx.moveTo(getPointerPos(canvas, e.touches[0]).x, getPointerPos(canvas, e.touches[0]).y);
             });
-
             canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 if (!drawing) return;
-                const touch = e.touches[0];
-                ctx.lineTo(getPointerPos(canvas, touch).x, getPointerPos(canvas, touch).y);
+                ctx.lineTo(getPointerPos(canvas, e.touches[0]).x, getPointerPos(canvas, e.touches[0]).y);
                 ctx.stroke();
                 canvasRefs[canvasId].hasSignature = true;
             });
-
             canvas.addEventListener('touchend', () => drawing = false);
         }
 
@@ -885,197 +2030,9 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Sistema de autenticación de seguridad y control de sesiones ---
-        // --- SISTEMA DE AUTENTICACIÓN (PROTECCIÓN DE ACCESO ABSOLUTO) ---
-        function checkAuthentication() {
-            const session = sessionStorage.getItem('park_session');
-            const header = document.querySelector('header');
-            const main = document.querySelector('main');
-            const nav = document.querySelector('nav');
-
-            if (session) {
-                activeUser = JSON.parse(session);
-                document.getElementById('loginSection').classList.add('hidden');
-                header.classList.remove('hidden');
-                main.classList.remove('hidden');
-                nav.classList.remove('hidden');
-                updateNavbarForRole();
-            } else {
-                document.getElementById('loginSection').classList.remove('hidden');
-                header.classList.add('hidden');
-                main.classList.add('hidden');
-                nav.classList.add('hidden');
-            }
-        }
-
-        function attemptLogin() {
-            const userIn = document.getElementById('loginUser').value.trim();
-            const passIn = document.getElementById('loginPassword').value.trim();
-
-            const user = db.usuarios.find(u => 
-                (u.username && u.username.toLowerCase() === userIn.toLowerCase()) || 
-                (u.email && u.email.toLowerCase() === userIn.toLowerCase())
-            );
-
-            if (user && user.pass === passIn) {
-                sessionStorage.setItem('park_session', JSON.stringify(user));
-                checkAuthentication(); // Activa y muestra la app de forma segura
-                showToast(`¡Bienvenido, ${user.name}!`);
-                
-                // Registro de auditoría del inicio del turno
-                registrarTurnoCelador('INGRESO_TURNO', user);
-
-                document.getElementById('loginUser').value = '';
-                document.getElementById('loginPassword').value = '';
-            } else {
-                showToast('Credenciales de acceso incorrectas.', 'error');
-            }
-        }
-
-        function logout() {
-            if (activeUser) {
-                // Registro de auditoría de salida del turno
-                registrarTurnoCelador('SALIDA_TURNO', activeUser);
-            }
-            sessionStorage.removeItem('park_session');
-            activeUser = null;
-            checkAuthentication(); // Oculta y bloquea toda la interfaz de nuevo
-            showToast('Sesión cerrada correctamente.', 'info');
-        }
-
-        function updateNavbarForRole() {
-            const badge = document.getElementById('roleBadge');
-            const adminTab = document.getElementById('btnNavConfig');
-            
-            badge.innerText = activeUser.rol;
-            
-            // Normalización estricta de rol para evitar fallos por mayúsculas o espacios desde Google Sheets
-            const userRoleNormalized = activeUser.rol ? activeUser.rol.trim().toLowerCase() : '';
-            
-            if (userRoleNormalized === 'administrador') {
-                badge.className = "bg-amber-500 text-slate-900 text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider";
-                adminTab.classList.remove('hidden');
-                renderCeladoresList();
-                renderFiltrosTurnos();
-                renderTurnos();
-            } else {
-                badge.className = "bg-emerald-800 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
-                adminTab.classList.add('hidden');
-                switchPanel('ingresos');
-            }
-        }
-
-        // --- STREAMING_CHUNK: Sistema para modificar contraseñas individuales de usuarios ---
-        // --- SISTEMA DE CAMBIO DE CLAVE DEL PERFIL LOGUEADO ---
-        function openMyPasswordModal() {
-            document.getElementById('myCurrentPass').value = '';
-            document.getElementById('myNewPass').value = '';
-            document.getElementById('myPasswordModal').classList.remove('hidden');
-        }
-
-        function closeMyPasswordModal() {
-            document.getElementById('myPasswordModal').classList.add('hidden');
-        }
-
-        async function guardarMiPassword() {
-            const currentPass = document.getElementById('myCurrentPass').value;
-            const newPass = document.getElementById('myNewPass').value.trim();
-
-            if (!currentPass || !newPass) {
-                showToast('Debe completar todos los campos del formulario.', 'error');
-                return;
-            }
-
-            if (activeUser.pass !== currentPass) {
-                showToast('La contraseña actual ingresada es incorrecta.', 'error');
-                return;
-            }
-
-            const userIndex = db.usuarios.findIndex(u => u.username === activeUser.username);
-            if (userIndex !== -1) {
-                db.usuarios[userIndex].pass = newPass;
-                activeUser.pass = newPass;
-                sessionStorage.setItem('park_session', JSON.stringify(activeUser));
-                saveDb();
-                closeMyPasswordModal();
-                showToast('Su contraseña ha sido actualizada con éxito.');
-
-                actualizarBadgeSincronizacion(false, "Sincronizando...");
-                const exito = await pushToCloud('ACTUALIZAR_USUARIO', {
-                    usuariosActualizados: db.usuarios,
-                    usuarioModificado: db.usuarios[userIndex]
-                });
-
-                if (exito) {
-                    actualizarBadgeSincronizacion(true);
-                    showToast('Contraseña sincronizada con la base central.');
-                    renderCeladoresList();
-                } else {
-                    showToast('Cambio guardado localmente. Se sincronizará en la nube próximamente.', 'info');
-                }
-            } else {
-                showToast('No se encontró su perfil de usuario en la base local.', 'error');
-            }
-        }
-
-        // --- SISTEMA ADMIN: CAMBIAR CLAVE DE OTROS USUARIOS ---
-        function abrirEditarPasswordUsuario(username) {
-            editingUserTargetUsername = username;
-            document.getElementById('adminEditUserTarget').innerText = username;
-            document.getElementById('adminEditUserNewPass').value = '';
-            document.getElementById('adminEditUserPasswordModal').classList.remove('hidden');
-        }
-
-        function closeAdminEditUserPasswordModal() {
-            document.getElementById('adminEditUserPasswordModal').classList.add('hidden');
-            editingUserTargetUsername = null;
-        }
-
-        async function guardarPasswordUsuarioAdmin() {
-            const newPass = document.getElementById('adminEditUserNewPass').value.trim();
-            if (!newPass) {
-                showToast('Por favor ingrese la nueva contraseña para el usuario.', 'error');
-                return;
-            }
-
-            const userIndex = db.usuarios.findIndex(u => u.username === editingUserTargetUsername);
-            if (userIndex !== -1) {
-                db.usuarios[userIndex].pass = newPass;
-                
-                // Si el administrador está cambiando su propia contraseña desde este panel alternativo
-                if (activeUser.username === editingUserTargetUsername) {
-                    activeUser.pass = newPass;
-                    sessionStorage.setItem('park_session', JSON.stringify(activeUser));
-                }
-
-                saveDb();
-                closeAdminEditUserPasswordModal();
-                renderCeladoresList();
-                showToast(`Contraseña del usuario ${editingUserTargetUsername} cambiada.`);
-
-                actualizarBadgeSincronizacion(false, "Sincronizando...");
-                const exito = await pushToCloud('ACTUALIZAR_USUARIO', {
-                    usuariosActualizados: db.usuarios,
-                    usuarioModificado: db.usuarios[userIndex]
-                });
-
-                if (exito) {
-                    actualizarBadgeSincronizacion(true);
-                    showToast('Contraseña de usuario sincronizada en Google Sheets.');
-                } else {
-                    showToast('Guardado de contraseña local listo.', 'info');
-                }
-            } else {
-                showToast('El usuario no existe.', 'error');
-            }
-        }
-
-        // --- STREAMING_CHUNK: Métodos para registrar ingresos de carros/motos con control de doble submit ---
-        // --- REGISTRO DE VEHÍCULOS (INGRESO CON BLOQUEO DE DOBLE CLIC) ---
         function toggleVehicleType(type) {
             const carLabel = document.getElementById('labelCarro');
             const motoLabel = document.getElementById('labelMoto');
-
             if (type === 'Carro') {
                 carLabel.className = "flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold";
                 motoLabel.className = "flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-slate-200 text-slate-600";
@@ -1085,635 +2042,13 @@
             }
         }
 
-        async function registrarIngreso(event) {
-            event.preventDefault();
-
-            // Bloquear si ya se está enviando una petición para evitar duplicados en celulares
-            if (isSubmittingIngreso) return;
-
-            if (!canvasRefs['firmaIngresoCanvas'].hasSignature) {
-                showToast('Por favor, solicite la firma del conductor antes de registrar el ingreso.', 'error');
-                return;
-            }
-
-            isSubmittingIngreso = true;
-            
-            // Efecto visual de envío en el botón
-            const form = event.target;
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Registrando...`;
-            }
-
-            try {
-                const tipo = document.querySelector('input[name="tipoVehiculo"]:checked').value;
-                const placa = document.getElementById('placa').value.toUpperCase().trim();
-                const bloque = document.getElementById('bloque').value.trim();
-                const apartamento = document.getElementById('apartamento').value.trim();
-                const autoriza = document.getElementById('autoriza').value.trim();
-                const telefono = document.getElementById('telefono').value.trim();
-                
-                const firmaB64 = canvasRefs['firmaIngresoCanvas'].canvas.toDataURL();
-
-                // Validar si el carro ya se encuentra adentro en la memoria local actual
-                const yaAdentro = db.registros.some(r => r.placa === placa && r.estado === 'Dentro');
-                if (yaAdentro) {
-                    showToast(`El vehículo con placa ${placa} ya registra ingreso activo en el conjunto.`, 'error');
-                    isSubmittingIngreso = false;
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalBtnHTML;
-                    }
-                    return;
-                }
-
-                const nuevoRegistro = {
-                    id: 'REG-' + Date.now(),
-                    tipo,
-                    placa,
-                    bloque,
-                    apartamento,
-                    autoriza,
-                    telefono,
-                    horaIngreso: new Date().toISOString(),
-                    firmaIngreso: firmaB64,
-                    horaSalida: null,
-                    firmaSalida: null,
-                    estado: 'Dentro',
-                    costo: 0
-                };
-
-                // Guardar localmente de inmediato
-                db.registros.push(nuevoRegistro);
-                saveDb();
-                renderActivos();
-
-                showToast('Guardando ingreso localmente...');
-
-                // Enviar evento de registro de ingreso a Google Sheets por medio de n8n
-                const pushExitoso = await pushToCloud('REGISTRAR_INGRESO', nuevoRegistro);
-                if (pushExitoso) {
-                    showToast('Ingreso sincronizado con Google Sheets.');
-                } else {
-                    showToast('Guardado de respaldo local listo.', 'info');
-                }
-                
-                // Limpiar formulario y firmas
-                form.reset();
-                clearCanvas('firmaIngresoCanvas');
-                toggleVehicleType('Carro');
-
-                switchPanel('activos');
-
-            } catch (err) {
-                console.error("Error al registrar ingreso:", err);
-                showToast("Ocurrió un error al procesar el ingreso. Intente nuevamente.", "error");
-            } finally {
-                // Restaurar el botón de envío
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnHTML;
-                }
-                isSubmittingIngreso = false;
-            }
-        }
-
-        // --- STREAMING_CHUNK: Métodos para pintar y actualizar la vista de carros activos ---
-        // --- INTERFAZ: VEHÍCULOS ACTIVOS & SALIDAS ---
-        function renderActivos() {
-            const listContainer = document.getElementById('listaActivos');
-            const activos = db.registros.filter(r => r.estado === 'Dentro');
-            
-            document.getElementById('activosCount').innerText = `${activos.length} En Sitio`;
-            const badgeCountNav = document.getElementById('badgeCountNav');
-            badgeCountNav.innerText = activos.length;
-            if (activos.length > 0) {
-                badgeCountNav.classList.remove('hidden');
-            } else {
-                badgeCountNav.classList.add('hidden');
-            }
-
-            listContainer.innerHTML = '';
-
-            if (activos.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2">
-                        <i class="fa-solid fa-face-smile text-4xl text-slate-300"></i>
-                        <p class="text-sm">No hay vehículos de visitantes adentro en este momento.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            activos.forEach(reg => {
-                const badgeColor = reg.tipo === 'Carro' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700';
-                const icon = reg.tipo === 'Carro' ? 'fa-car' : 'fa-motorcycle';
-                const formatTime = formatBogotaTime(reg.horaIngreso);
-
-                const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm flex flex-col justify-between space-y-3";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center space-x-3">
-                            <span class="${badgeColor} p-2 rounded-lg text-lg">
-                                <i class="fa-solid ${icon}"></i>
-                            </span>
-                            <div>
-                                <h3 class="font-mono font-black text-slate-800 text-lg">${reg.placa}</h3>
-                                <p class="text-xs text-slate-500 font-semibold">Bloque ${reg.bloque} - Apto ${reg.apartamento}</p>
-                            </div>
-                        </div>
-                        <span class="bg-emerald-50 text-emerald-700 text-[10px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> Entrada: ${formatTime}
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 text-xs border-t pt-2 text-slate-600">
-                        <div><strong class="text-slate-500">Autoriza:</strong> <span class="font-medium">${reg.autoriza}</span></div>
-                        <div class="flex items-center justify-end">
-                            <a href="tel:${reg.telefono}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-phone"></i> Llamar
-                            </a>
-                        </div>
-                    </div>
-
-                    <button onclick="abrirSalidaModal('${reg.id}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition tracking-wide flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-arrow-right-from-bracket text-amber-300"></i> Registrar Salida / Cobro
-                    </button>
-                `;
-                listContainer.appendChild(card);
+        function encodeFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
             });
-        }
-
-        // --- STREAMING_CHUNK: Lógica matemática de cobro de minutos con horas de cortesía ---
-        // --- MODAL DE COBRO & CÁLCULOS POR MINUTO + HORAS GRATIS ---
-        function abrirSalidaModal(id) {
-            activeCheckoutId = id;
-            const reg = db.registros.find(r => r.id === id);
-            if (!reg) return;
-
-            const entryDate = new Date(reg.horaIngreso);
-            const exitDate = new Date();
-
-            const durationMs = exitDate - entryDate;
-            const totalMinutes = Math.floor(durationMs / (1000 * 60));
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-
-            let minutesToCharge = totalMinutes;
-            let freeMinutes = 0;
-
-            // Lógica para aplicar horas gratis de cortesía
-            if (db.config.horasGratisHabilitadas) {
-                freeMinutes = Math.round((db.config.horasGratisCantidad || 0) * 60);
-                minutesToCharge = Math.max(0, totalMinutes - freeMinutes);
-            }
-
-            const rate = reg.tipo === 'Carro' ? (db.config.tarifaCarro || 50) : (db.config.tarifaMoto || 25);
-            const cost = minutesToCharge * rate;
-
-            document.getElementById('checkoutPlaca').innerText = reg.placa;
-            document.getElementById('checkoutTipo').innerText = reg.tipo;
-            document.getElementById('checkoutIngreso').innerText = formatBogotaDateTime(reg.horaIngreso);
-            document.getElementById('checkoutSalida').innerText = formatBogotaDateTime(exitDate.toISOString());
-            
-            // Texto detallado de duración en sitio
-            let durationText = `${hours}h ${minutes}m`;
-            if (db.config.horasGratisHabilitadas) {
-                durationText += ` (Cortesía: ${db.config.horasGratisCantidad}h, Cobrados: ${minutesToCharge} min)`;
-            } else {
-                durationText += ` (Cobrados: ${minutesToCharge} min)`;
-            }
-            document.getElementById('checkoutDuracion').innerText = durationText;
-            
-            const formattedCost = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(cost);
-            document.getElementById('checkoutCosto').innerText = formattedCost;
-
-            reg.tmpCosto = cost;
-            reg.tmpHoraSalida = exitDate.toISOString();
-            reg.tmpDuracionTxt = `${hours} horas y ${minutes} minutos. Minutos cobrados: ${minutesToCharge} min (Tarifa por minuto: $${rate} COP).`;
-
-            document.getElementById('salidaModal').classList.remove('hidden');
-            setTimeout(() => setupCanvas('firmaSalidaCanvas'), 100);
-        }
-
-        function closeSalidaModal() {
-            document.getElementById('salidaModal').classList.add('hidden');
-            clearCanvas('firmaSalidaCanvas');
-            activeCheckoutId = null;
-        }
-
-        async function completarSalida() {
-            if (!activeCheckoutId) return;
-
-            // Bloquear para evitar dobles envíos en celulares
-            if (isSubmittingSalida) return;
-
-            if (!canvasRefs['firmaSalidaCanvas'].hasSignature) {
-                showToast('Se requiere la firma del conductor para certificar la salida.', 'error');
-                return;
-            }
-
-            const reg = db.registros.find(r => r.id === activeCheckoutId);
-            if (!reg) return;
-
-            isSubmittingSalida = true;
-
-            // Bloquear botón visualmente
-            const submitBtn = document.querySelector('#salidaModal button[onclick="completarSalida()"]');
-            const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Procesando...`;
-            }
-
-            try {
-                const firmaSalidaB64 = canvasRefs['firmaSalidaCanvas'].canvas.toDataURL();
-
-                reg.horaSalida = reg.tmpHoraSalida;
-                reg.costo = reg.tmpCosto;
-                reg.firmaSalida = firmaSalidaB64;
-                reg.estado = 'Completado';
-
-                const duracionFinal = reg.tmpDuracionTxt;
-
-                delete reg.tmpCosto;
-                delete reg.tmpHoraSalida;
-                delete reg.tmpDuracionTxt;
-
-                saveDb();
-                renderActivos();
-                closeSalidaModal();
-                showToast('Salida registrada en base local.');
-
-                // Envía evento de salida a Google Sheets y dispara el correo mediante n8n
-                showToast('Sincronizando salida y enviando correo...');
-                const datosParaEnvio = {
-                    ...reg,
-                    duracion: duracionFinal,
-                    costoFormateado: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reg.costo),
-                    correoDestino: db.config.correoDestino
-                };
-
-                const pushExitoso = await pushToCloud('REGISTRAR_SALIDA', datosParaEnvio);
-                if (pushExitoso) {
-                    showToast('Salida guardada en Google Sheets e Email enviado.');
-                } else {
-                    showToast('Guardado temporalmente en cola de espera.', 'error');
-                }
-            } catch (err) {
-                console.error("Error al procesar salida:", err);
-                showToast("Ocurrió un error al guardar la salida.", "error");
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnHTML;
-                }
-                isSubmittingSalida = false;
-            }
-        }
-
-        // --- STREAMING_CHUNK: Lógica administrativa de guardado de tarifas e incentivos ---
-        // --- SISTEMA DE CONFIGURACIÓN (ADMINISTRADOR) ---
-        function toggleHorasGratisInput() {
-            const checked = document.getElementById('horasGratisHabilitadas').checked;
-            const container = document.getElementById('horasGratisCantidadContainer');
-            if (checked) {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-
-        async function guardarConfiguracion() {
-            const tc = parseInt(document.getElementById('tarifaCarro').value);
-            const tm = parseInt(document.getElementById('tarifaMoto').value);
-            const hgHabilitadas = document.getElementById('horasGratisHabilitadas').checked;
-            const hgCantidad = parseFloat(document.getElementById('horasGratisCantidad').value) || 0;
-            const correo = document.getElementById('correoDestino').value.trim();
-
-            if (isNaN(tc) || isNaN(tm) || !correo) {
-                showToast('Complete todos los campos del panel de administración.', 'error');
-                return;
-            }
-
-            db.config.tarifaCarro = tc;
-            db.config.tarifaMoto = tm;
-            db.config.horasGratisHabilitadas = hgHabilitadas;
-            db.config.horasGratisCantidad = hgCantidad;
-            db.config.correoDestino = correo;
-
-            saveDb();
-            showToast('Tarifas locales actualizadas.');
-
-            // Sincronizar actualización de configuración a Google Sheets
-            actualizarBadgeSincronizacion(false, "Guardando...");
-            const configExito = await pushToCloud('ACTUALIZAR_CONFIG', db.config);
-            if (configExito) {
-                actualizarBadgeSincronizacion(true);
-                showToast('Configuraciones actualizadas en Google Sheets.');
-            } else {
-                showToast('Guardado localmente. No se pudo enviar a Google Sheets.', 'info');
-            }
-        }
-
-        // --- STREAMING_CHUNK: Cambiar contraseña de administrador principal ---
-        // Cambio de contraseña seguro para el Administrador
-        async function cambiarPasswordAdmin() {
-            const currentPass = document.getElementById('adminCurrentPass').value;
-            const newPass = document.getElementById('adminNewPass').value.trim();
-
-            if (!currentPass || !newPass) {
-                showToast('Complete ambos campos de contraseña para proceder.', 'error');
-                return;
-            }
-
-            if (activeUser.pass !== currentPass) {
-                showToast('La contraseña actual ingresada es incorrecta.', 'error');
-                return;
-            }
-
-            const userIndex = db.usuarios.findIndex(u => u.username === activeUser.username);
-            if (userIndex !== -1) {
-                db.usuarios[userIndex].pass = newPass;
-                activeUser.pass = newPass;
-                sessionStorage.setItem('park_session', JSON.stringify(activeUser));
-                saveDb();
-
-                document.getElementById('adminCurrentPass').value = '';
-                document.getElementById('adminNewPass').value = '';
-
-                showToast('Contraseña guardada en base local.');
-
-                actualizarBadgeSincronizacion(false, "Sincronizando...");
-                const exito = await pushToCloud('ACTUALIZAR_USUARIO', {
-                    usuariosActualizados: db.usuarios,
-                    usuarioModificado: db.usuarios[userIndex]
-                });
-
-                if (exito) {
-                    actualizarBadgeSincronizacion(true);
-                    showToast('Contraseña sincronizada con Google Sheets.');
-                    renderCeladoresList();
-                } else {
-                    showToast('Sincronización fallida. Cambios de contraseña locales listos.', 'info');
-                }
-            } else {
-                showToast('No se encontró tu perfil de administrador en la base local.', 'error');
-            }
-        }
-
-        // --- STREAMING_CHUNK: Registro de nuevo personal y celadores ---
-        async function crearCelador() {
-            if (isSubmittingCelador) return;
-
-            const name = document.getElementById('nuevoCeladorName').value.trim();
-            const username = document.getElementById('nuevoCeladorUser').value.trim();
-            const pass = document.getElementById('nuevoCeladorPass').value.trim();
-            const phone = document.getElementById('nuevoCeladorPhone').value.trim();
-            const rol = document.getElementById('nuevoCeladorRol').value;
-            const email = document.getElementById('nuevoCeladorEmail').value.trim();
-
-            if (!name || !username || !pass || !phone || !email) {
-                showToast('Debe completar todos los campos del nuevo usuario.', 'error');
-                return;
-            }
-
-            const existe = db.usuarios.some(u => u.username.toLowerCase() === username.toLowerCase());
-            if (existe) {
-                showToast('El nombre de usuario ya se encuentra registrado.', 'error');
-                return;
-            }
-
-            isSubmittingCelador = true;
-
-            const nuevoUsuario = {
-                name,
-                username,
-                pass,
-                phone,
-                rol,
-                email
-            };
-
-            db.usuarios.push(nuevoUsuario);
-            saveDb();
-            renderCeladoresList();
-            renderFiltrosTurnos(); // Actualizar filtros de turnos
-            
-            // Limpiar inputs
-            document.getElementById('nuevoCeladorName').value = '';
-            document.getElementById('nuevoCeladorUser').value = '';
-            document.getElementById('nuevoCeladorPass').value = '';
-            document.getElementById('nuevoCeladorPhone').value = '';
-            document.getElementById('nuevoCeladorEmail').value = '';
-
-            showToast('Sincronizando nuevo usuario...');
-            
-            // Sincronizar usuario a Google Sheets mediante evento en n8n
-            const pushExitoso = await pushToCloud('CREAR_USUARIO', {
-                usuariosActualizados: db.usuarios,
-                usuarioCreado: nuevoUsuario
-            });
-
-            isSubmittingCelador = false;
-
-            if (pushExitoso) {
-                showToast('Usuario registrado en la base de datos central de Google Sheets.');
-            } else {
-                showToast('Agregado localmente. Guardado en cola de sincronización.', 'info');
-            }
-        }
-
-        async function eliminarUsuario(username) {
-            if (username === 'admin' || username === 'celador') {
-                showToast('No se pueden eliminar las cuentas maestro de demostración.', 'error');
-                return;
-            }
-
-            if (activeUser && activeUser.username === username) {
-                showToast('No puedes eliminar el usuario con el que tienes sesión activa.', 'error');
-                return;
-            }
-
-            db.usuarios = db.usuarios.filter(u => u.username !== username);
-            saveDb();
-            renderCeladoresList();
-            renderFiltrosTurnos(); // Actualizar filtros de turnos
-            showToast('Eliminando usuario centralmente...');
-
-            // Sincronizar la eliminación del celador con Google Sheets
-            const pushExitoso = await pushToCloud('ELIMINAR_USUARIO', {
-                usuariosActualizados: db.usuarios,
-                usuarioEliminadoUsername: username
-            });
-
-            if (pushExitoso) {
-                showToast('Usuario removido de Google Sheets con éxito.');
-            } else {
-                showToast('Usuario removido localmente.', 'info');
-            }
-        }
-
-        function renderCeladoresList() {
-            const list = document.getElementById('listaCeladores');
-            list.innerHTML = '';
-
-            db.usuarios.forEach(c => {
-                // Normalización para visualización de badges del personal
-                const cRoleNormalized = c.rol ? c.rol.trim().toLowerCase() : '';
-                const isClientAdmin = cRoleNormalized === 'administrador';
-                const icon = isClientAdmin ? 'fa-user-gear text-amber-500' : 'fa-user-shield text-slate-400';
-                
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center py-3 text-sm";
-                li.innerHTML = `
-                    <div class="flex-1 min-w-0 pr-2">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid ${icon}"></i>
-                            <span class="font-semibold text-slate-800 truncate">${c.name}</span>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${isClientAdmin ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">${c.rol}</span>
-                        </div>
-                        <div class="text-xs text-slate-500 mt-1 space-y-0.5">
-                            <div><span class="font-medium text-slate-400">Usuario:</span> <span class="font-mono text-slate-700">${c.username}</span></div>
-                            <div><span class="font-medium text-slate-400">Correo:</span> ${c.email || 'No asignado'}</div>
-                            <div><span class="font-medium text-slate-400">Tel:</span> ${c.phone || 'No asignado'}</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-1 flex-shrink-0">
-                        <button onclick="abrirEditarPasswordUsuario('${c.username}')" title="Asignar Contraseña" class="text-blue-500 hover:text-blue-700 transition p-1">
-                            <i class="fa-solid fa-key"></i>
-                        </button>
-                        <button onclick="eliminarUsuario('${c.username}')" title="Eliminar" class="text-rose-500 hover:text-rose-700 transition p-1">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                `;
-                list.appendChild(li);
-            });
-        }
-
-        // --- STREAMING_CHUNK: Creando el listado y filtros de auditoría de turnos ---
-        // --- SECCIÓN AUDITORÍA DE TURNOS ---
-        function renderFiltrosTurnos() {
-            const selectCelador = document.getElementById('filtroUsuarioTurnos');
-            if (!selectCelador) return;
-
-            const valActual = selectCelador.value;
-            selectCelador.innerHTML = '<option value="Todos">-- Todos --</option>';
-
-            db.usuarios.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.username;
-                opt.innerText = `${u.name} (${u.username})`;
-                selectCelador.appendChild(opt);
-            });
-
-            selectCelador.value = valActual;
-        }
-
-        function renderTurnos() {
-            const list = document.getElementById('listaTurnos');
-            const totalCountLabel = document.getElementById('turnosHoyCount');
-            if (!list) return;
-
-            const filtroFecha = document.getElementById('filtroFechaTurnos').value; // YYYY-MM-DD
-            const filtroCelador = document.getElementById('filtroUsuarioTurnos').value;
-
-            list.innerHTML = '';
-
-            if (!db.turnos) {
-                db.turnos = [];
-            }
-
-            // Filtrar turnos basándonos en la fecha normalizada a Bogotá y en el celador seleccionado
-            const turnosFiltrados = db.turnos.filter(turno => {
-                const fechaTurnoBogota = formatBogotaDateISO(turno.timestamp); // Devuelve YYYY-MM-DD
-                const coincideFecha = fechaTurnoBogota === filtroFecha;
-                const coincideCelador = (filtroCelador === 'Todos' || turno.username === filtroCelador);
-                return coincideFecha && coincideCelador;
-            });
-
-            // Ordenar los turnos de manera cronológica (el más reciente primero)
-            turnosFiltrados.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            totalCountLabel.innerText = `${turnosFiltrados.length} registros`;
-
-            if (turnosFiltrados.length === 0) {
-                list.innerHTML = `
-                    <li class="py-4 text-center text-slate-400 bg-slate-50 rounded-xl">
-                        <i class="fa-solid fa-calendar-xmark text-lg mb-1 block"></i>
-                        No hay registros de turnos para este día.
-                    </li>
-                `;
-                return;
-            }
-
-            turnosFiltrados.forEach(turno => {
-                const horaBogota = formatBogotaTime(turno.timestamp);
-                const isEntrada = turno.evento.toLowerCase().includes('entrada');
-                const badgeColor = isEntrada ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
-                const icon = isEntrada ? 'fa-arrow-right-to-bracket text-emerald-600' : 'fa-arrow-right-from-bracket text-rose-600';
-
-                const li = document.createElement('li');
-                li.className = "py-2.5 flex justify-between items-center";
-                li.innerHTML = `
-                    <div class="flex items-center space-x-2.5 min-w-0">
-                        <span class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid ${icon} text-sm"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <p class="font-bold text-slate-800 truncate text-xs">${turno.name}</p>
-                            <p class="text-[10px] text-slate-400 font-semibold uppercase">${turno.rol} • @${turno.username}</p>
-                        </div>
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                        <span class="${badgeColor} px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">${isEntrada ? 'Entrada' : 'Salida'}</span>
-                        <p class="text-[11px] text-slate-700 font-bold mt-1 font-mono">${horaBogota}</p>
-                    </div>
-                `;
-                list.appendChild(li);
-            });
-        }
-
-        // --- STREAMING_CHUNK: Sistema de control de paneles y visibilidad de pestañas ---
-        // --- SISTEMA DE PANELES ---
-        function switchPanel(panelName) {
-            // CONTROL DE SEGURIDAD ESTRICTO: Solo el rol de Administrador puede ingresar a la configuración
-            if (panelName === 'config') {
-                const userRoleNormalized = activeUser && activeUser.rol ? activeUser.rol.trim().toLowerCase() : '';
-                if (userRoleNormalized !== 'administrador') {
-                    showToast('Acceso denegado. Únicamente los administradores tienen acceso a la configuración.', 'error');
-                    return;
-                }
-            }
-
-            const panels = document.querySelectorAll('.app-panel');
-            panels.forEach(p => p.classList.add('hidden'));
-
-            const btnIngresos = document.getElementById('btnNavIngresos');
-            const btnActivos = document.getElementById('btnNavActivos');
-            const btnConfig = document.getElementById('btnNavConfig');
-
-            btnIngresos.className = "flex-1 py-3 flex flex-col items-center text-slate-400";
-            btnActivos.className = "flex-1 py-3 flex flex-col items-center text-slate-400";
-            btnConfig.className = "flex-1 py-3 flex flex-col items-center text-slate-400";
-
-            if (panelName === 'ingresos') {
-                document.getElementById('panelIngresos').classList.remove('hidden');
-                btnIngresos.className = "flex-1 py-3 flex flex-col items-center text-emerald-600";
-            } else if (panelName === 'activos') {
-                document.getElementById('panelActivos').classList.remove('hidden');
-                btnActivos.className = "flex-1 py-3 flex flex-col items-center text-emerald-600";
-                renderActivos();
-            } else if (panelName === 'config') {
-                document.getElementById('panelConfig').classList.remove('hidden');
-                btnConfig.className = "flex-1 py-3 flex flex-col items-center text-emerald-600";
-                renderFiltrosTurnos();
-                renderTurnos();
-            }
         }
     </script>
 </body>
