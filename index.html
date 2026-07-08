@@ -269,11 +269,10 @@
                                 <input id="zonaHora" type="time" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Método de Pago</label>
                             <div class="grid grid-cols-2 gap-2">
-                                <label class="flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold" id="labelPagoSoporte">
+                                <label class="flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-850" id="labelPagoSoporte">
                                     <input type="radio" name="zonaMetodoPago" value="Soporte" checked class="hidden" onchange="toggleMetodoPago('Soporte')">
                                     Adjuntar Recibo
                                 </label>
@@ -667,7 +666,7 @@
     </nav>
 
     <script>
-        // --- WEBHOOKS INTEGRADOS ---
+        // --- WEBHOOKS INTEGRADOS (Actualizados) ---
         let webhookPush = localStorage.getItem('webhook_push_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
         let webhookPull = localStorage.getItem('webhook_pull_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
 
@@ -763,9 +762,6 @@
             }
             sanitizeDb();
 
-            // Sincronizar y validar la sesión antes de comenzar el renderizado
-            checkAuthentication();
-
             const setElementValue = (id, value) => {
                 const element = document.getElementById(id);
                 if (element) element.value = value;
@@ -790,6 +786,7 @@
             setElementValue('tarifaMoto', db.config.tarifaMoto);
             setElementValue('correoDestino', db.config.correoDestino);
 
+            checkAuthentication();
             await pullFromCloud();
         };
 
@@ -1039,6 +1036,10 @@
             const btnNavPaqueteria = document.getElementById('btnNavPaqueteria');
             const btnSubZonasReservar = document.getElementById('btnSubZonasReservar');
             const btnSubMudRegistrar = document.getElementById('btnSubMudRegistrar');
+            
+            // Sub-pestañas internas de Parqueadero para controlar visibilidad
+            const btnSubParqIngresar = document.getElementById('btnSubParqIngresar');
+            const btnSubParqActivos = document.getElementById('btnSubParqActivos');
 
             if (!badge || !adminTab) return;
             if (!activeUser) return;
@@ -1050,6 +1051,8 @@
                 adminTab.classList.remove('hidden');
                 btnNavParqueadero.classList.remove('hidden');
                 btnNavPaqueteria.classList.remove('hidden');
+                if (btnSubParqIngresar) btnSubParqIngresar.classList.remove('hidden');
+                if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
                 if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
                 switchPanel('parqueadero');
@@ -1058,6 +1061,8 @@
                 adminTab.classList.add('hidden');
                 btnNavParqueadero.classList.remove('hidden');
                 btnNavPaqueteria.classList.remove('hidden');
+                if (btnSubParqIngresar) btnSubParqIngresar.classList.remove('hidden');
+                if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
                 
                 // Restricción Celador: Solo ver Zonas y Mudanzas, no puede crear registros en ellas
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.add('hidden');
@@ -1069,12 +1074,18 @@
                 badge.className = "bg-indigo-600 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
                 adminTab.classList.add('hidden');
                 
-                // Restricción Propietario: No ve parqueaderos ni paqueterías de portería
-                btnNavParqueadero.classList.add('hidden');
+                // El propietario SÍ puede ver la sección de Parqueadero para consultar quién está en sitio
+                btnNavParqueadero.classList.remove('hidden');
+                // PERO se le oculta la opción para registrar nuevos ingresos
+                if (btnSubParqIngresar) btnSubParqIngresar.classList.add('hidden');
+                if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
+                
                 btnNavPaqueteria.classList.add('hidden');
                 
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
                 if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
+                
+                // Redirigir por defecto a Zonas al iniciar sesión
                 switchPanel('zonas');
             }
         }
@@ -1252,6 +1263,25 @@
                 const icon = reg.tipo === 'Carro' ? 'fa-car' : 'fa-motorcycle';
                 const formatTime = new Date(reg.horaIngreso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+                // Ocultar acciones de llamada y botones de cobro/salida si el usuario conectado es Propietario
+                const esPropietario = activeUser && activeUser.rol === 'Propietario';
+                const contactoHtml = esPropietario ? '' : `
+                    <div class="flex justify-between items-center text-xs border-t pt-2 text-slate-600">
+                        <div><strong class="text-slate-500">Autoriza:</strong> <span class="font-medium">${reg.autoriza}</span></div>
+                        <div class="flex gap-1">
+                            <a href="tel:${reg.telefono}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                const botonSalidaHtml = esPropietario ? '' : `
+                    <button onclick="abrirSalidaModal('${reg.id}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition tracking-wide flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-amber-300"></i> Registrar Salida / Cobro
+                    </button>
+                `;
+
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm flex flex-col justify-between space-y-3";
                 card.innerHTML = `
@@ -1269,20 +1299,8 @@
                             Entrada: ${formatTime}
                         </span>
                     </div>
-
-                    <div class="flex justify-between items-center text-xs border-t pt-2 text-slate-600">
-                        <div><strong class="text-slate-500">Autoriza:</strong> <span class="font-medium">${reg.autoriza}</span></div>
-                        <!-- Botones de contacto directo para Celador -->
-                        <div class="flex gap-1">
-                            <a href="tel:${reg.telefono}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
-                                <i class="fa-solid fa-phone"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <button onclick="abrirSalidaModal('${reg.id}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition tracking-wide flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-arrow-right-from-bracket text-amber-300"></i> Registrar Salida / Cobro
-                    </button>
+                    ${contactoHtml}
+                    ${botonSalidaHtml}
                 `;
                 listContainer.appendChild(card);
             });
@@ -1377,7 +1395,7 @@
             const contenedorSoporte = document.getElementById('contenedorSoportePago');
 
             if (metodo === 'Soporte') {
-                if (labelSoporte) labelSoporte.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-800";
+                if (labelSoporte) labelSoporte.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-emerald-500 bg-emerald-50 text-emerald-850";
                 if (labelFactura) labelFactura.className = "flex items-center justify-center p-2.5 border rounded-xl cursor-pointer text-xs font-semibold border-slate-200 text-slate-500";
                 if (contenedorSoporte) contenedorSoporte.classList.remove('hidden');
             } else {
@@ -1729,6 +1747,7 @@
             });
         }
 
+        // --- SISTEMA DE ENTREGA DE PAQUETES ---
         function abrirEntregaPaqueteModal(id) {
             activeEntregaPaqueteId = id;
             const paq = db.paquetes.find(p => p.id === id);
@@ -1785,6 +1804,7 @@
             await pushToCloud('ACTUALIZAR_CONFIG', db.config);
         }
 
+        // --- RENDERIZADO Y CONTROL DE USUARIOS (Celadores/Propietarios) ---
         function renderCeladoresList() {
             const list = document.getElementById('listaCeladores');
             if (!list) return;
@@ -1871,6 +1891,13 @@
 
             if (panelName === 'parqueadero') {
                 document.getElementById('panelParqueadero').classList.remove('hidden');
+                // Enrutamiento forzado de sub-pestañas:
+                // Si el usuario es Propietario, lo obligamos a ver directamente "Vehículos Adentro" (activos)
+                if (activeUser && activeUser.rol === 'Propietario') {
+                    switchSubTab('parqueadero', 'activos');
+                } else {
+                    switchSubTab('parqueadero', 'ingresar');
+                }
                 renderActivos();
             } else if (panelName === 'zonas') {
                 document.getElementById('panelZonas').classList.remove('hidden');
