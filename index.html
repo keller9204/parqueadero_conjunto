@@ -318,7 +318,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label for="zonaFecha" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Uso</label>
-                                <input id="zonaFecha" type="date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
+                                <input id="zonaFecha" type="date" required class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Inicio</label>
@@ -393,11 +393,11 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Trasteo</label>
-                                <input id="mudFecha" type="date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                                <input id="mudFecha" type="date" required class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-xs">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Estimada</label>
-                                <input id="mudHora" type="time" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                                <input id="mudHora" type="time" required class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-xs">
                             </div>
                         </div>
                         <div>
@@ -448,7 +448,7 @@
                     <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Paquete
                 </button>
                 <button onclick="switchSubTab('paqueteria', 'inventario')" id="btnSubPaqueteriaInventario" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
-                    <i class="fa-solid fa-boxes-stacked mr-1"></i> En Portería
+                    <i class="fa-solid :fa-box-open text-xl mb-1"></i> En Portería
                 </button>
             </div>
 
@@ -462,20 +462,20 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
-                                <input id="paqBloque" type="text" required placeholder="Bloque 3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                <input id="paqBloque" type="text" required placeholder="Bloque 3" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
-                                <input id="paqApto" type="text" required placeholder="1204" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                <input id="paqApto" type="text" required placeholder="1204" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Destinatario (Residente)</label>
-                            <input id="paqDestinatario" type="text" required placeholder="Nombre del residente" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            <input id="paqDestinatario" type="text" required placeholder="Nombre del residente" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Empresa / Transportadora</label>
-                            <select id="paqCourier" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                            <select id="paqCourier" required class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none">
                                 <option value="MercadoLibre">MercadoLibre</option>
                                 <option value="Amazon">Amazon</option>
                                 <option value="Servientrega">Servientrega</option>
@@ -766,7 +766,7 @@
                 <span class="text-[9px] font-bold tracking-wider uppercase">Parqueo</span>
             </button>
             <button onclick="switchPanel('zonas')" id="btnNavZonas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
-                <i class="fa-solid :fa-calendar-check text-xl mb-1"></i>
+                <i class="fa-solid fa-calendar-check text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Zonas</span>
             </button>
             <button onclick="switchPanel('mudanzas')" id="btnNavMudanzas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
@@ -785,19 +785,19 @@
     </nav>
 
     <script>
-        // --- WEBHOOKS INTEGRADOS ---
-        let defaultPush = 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
-        let defaultPull = 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
+        // --- WEBHOOKOS INTEGRADOS ---
+        let defaultPush = 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
+        let defaultPull = 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
 
         let webhookPush = SafeStorage.getItem('webhook_push_url');
         let webhookPull = SafeStorage.getItem('webhook_pull_url');
 
-        // Reset automático de URLs obsoletas si existen configuraciones antiguas en caché
-        if (!webhookPush || webhookPush.includes('procesar-accion') || webhookPush.includes('procesar_accion')) {
+        // Reset automático de URLs obsoletas si existen configuraciones antiguas o invertidas en caché
+        if (!webhookPush || webhookPush !== defaultPush) {
             webhookPush = defaultPush;
             SafeStorage.setItem('webhook_push_url', defaultPush);
         }
-        if (!webhookPull || webhookPull.includes('obtener-datos') || webhookPull.includes('obtener_datos')) {
+        if (!webhookPull || webhookPull !== defaultPull) {
             webhookPull = defaultPull;
             SafeStorage.setItem('webhook_pull_url', defaultPull);
         }
@@ -1030,7 +1030,7 @@
                     li.innerHTML = `
                         <div>
                             <span class="font-bold text-slate-800">${z.nombre}</span>
-                            <span class="text-slate-500 ml-1">(${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(z.tarifa)})</span>
+                            <span class="text-slate-500 ml-1">(${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(tarifa)})</span>
                         </div>
                         <button onclick="eliminarZonaComun(${index})" class="text-rose-500 hover:text-rose-700">
                             <i class="fa-solid fa-trash-can"></i>
@@ -1661,7 +1661,7 @@
                 const badgeColor = res.estado === 'Aprobado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
                 
                 // Buscar tarifa dinámica
-                const zonaConfig = db.config.zonas.find(z => z && z.nombre === res.zona);
+                const zonaConfig = db.config.zonas.find(z => z.nombre === res.zona);
                 const tarifa = zonaConfig ? zonaConfig.tarifa : 0;
                 const costText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(tarifa);
 
@@ -2056,7 +2056,7 @@
             const rolEl = document.getElementById('nuevoCeladorRol');
             const emailEl = document.getElementById('nuevoCeladorEmail');
 
-            if (!nameEl || !usernameEl || !passEl || !phoneEl || !rolEl || !emailEl) return;
+            if (!nameEl || !usernameEl || !passEl || !phoneEl || !colno || !rolEl || !emailEl) return;
 
             const name = nameEl.value.trim();
             const username = usernameEl.value.trim().toLowerCase();
@@ -2252,6 +2252,7 @@
             }
         }
 
+        // --- SISTEMA DE SUB-PESTAÑAS ---
         function switchSubTab(modulo, targetTab) {
             if (modulo === 'parqueadero') {
                 const subIngresar = document.getElementById('subParqIngresar');
