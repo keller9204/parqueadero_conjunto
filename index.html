@@ -94,8 +94,21 @@
                 <i class="fa-solid fa-square-parking text-2xl text-amber-300 animate-pulse"></i>
                 <h1 class="font-bold text-lg tracking-tight">ParkResidente</h1>
             </div>
-            <div class="flex items-center space-x-2">
-                <!-- Indicador de Sincronización con Google Sheets -->
+            <div class="flex items-center space-x-2.5">
+                <!-- Iconos de Notificaciones Inteligentes en el Header -->
+                <!-- 1. Notificaciones para Administrador y Celador (Reservas y Mudanzas Pendientes) -->
+                <button id="btnNotifAdmin" onclick="abrirNotificacionesModal()" class="hidden relative text-white hover:text-amber-200 transition focus:outline-none py-1 px-1.5 rounded-lg">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    <span id="badgeCountNotifAdmin" class="absolute -top-1 -right-1.5 bg-rose-500 text-white font-bold text-[8px] px-1 py-0.5 rounded-full min-w-[14px] text-center border border-white">0</span>
+                </button>
+                
+                <!-- 2. Notificaciones para Propietarios (Paquetes Pendientes) -->
+                <button id="btnNotifProp" onclick="abrirNotificacionesModal()" class="hidden relative text-white hover:text-amber-200 transition focus:outline-none py-1 px-1.5 rounded-lg">
+                    <i class="fa-solid fa-box-open text-lg"></i>
+                    <span id="badgeCountNotifProp" class="absolute -top-1 -right-1.5 bg-amber-400 text-slate-950 font-black text-[8px] px-1 py-0.5 rounded-full min-w-[14px] text-center border border-white">0</span>
+                </button>
+
+                <!-- Indicador de Sincronización -->
                 <span id="syncStatusBadge" onclick="forzarSincronizacion()" class="cursor-pointer text-[10px] bg-emerald-800 text-emerald-200 px-2 py-1 rounded-lg flex items-center gap-1 font-semibold">
                     <i class="fa-solid fa-cloud"></i> <span id="syncStatusText">Local</span>
                 </span>
@@ -187,7 +200,9 @@
         <!-- Contenedor de Alertas Personalizado -->
         <div id="toastContainer" class="fixed top-16 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm z-50 pointer-events-none"></div>
 
+        <!-- ========================================================================= -->
         <!-- MÓDULO 1: CONTROL DE PARQUEADERO (VISITANTES) -->
+        <!-- ========================================================================= -->
         <div id="panelParqueadero" class="app-panel space-y-4">
             <div id="tabParqueaderoNavegacion" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('parqueadero', 'ingresar')" id="btnSubParqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
@@ -276,7 +291,9 @@
             </div>
         </div>
 
+        <!-- ========================================================================= -->
         <!-- MÓDULO 2: CONTROL Y RESERVA DE ZONAS COMUNES -->
+        <!-- ========================================================================= -->
         <div id="panelZonas" class="app-panel space-y-4 hidden">
             <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('zonas', 'reservar')" id="btnSubZonasReservar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
@@ -304,11 +321,11 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label for="zonaBloque" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
-                                <input id="zonaBloque" type="text" required placeholder="Bloque 1" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
+                                <input id="zonaBloque" type="text" required placeholder="Bloque 1" oninput="dispararAutoLlenado('zona')" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
                             </div>
                             <div>
                                 <label for="zonaApto" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
-                                <input id="zonaApto" type="text" required placeholder="503" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
+                                <input id="zonaApto" type="text" required placeholder="503" oninput="dispararAutoLlenado('zona')" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none disabled:opacity-75 disabled:bg-slate-100">
                             </div>
                         </div>
                         <div>
@@ -322,7 +339,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Inicio</label>
-                                <input id="zonaHora" type="time" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
+                                <input id="zonaHora" type="time" required class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                         </div>
                         <div>
@@ -362,7 +379,9 @@
             </div>
         </div>
 
+        <!-- ========================================================================= -->
         <!-- MÓDULO 3: REGISTRO EXTENDIDO DE MUDANZAS Y TRASTEOS -->
+        <!-- ========================================================================= -->
         <div id="panelMudanzas" class="app-panel space-y-4 hidden">
             <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('mudanzas', 'registrar')" id="btnSubMudRegistrar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
@@ -441,14 +460,16 @@
             </div>
         </div>
 
+        <!-- ========================================================================= -->
         <!-- MÓDULO 4: ALERTAS DE CORRESPONDENCIA Y PAQUETERÍA EXPRESS -->
+        <!-- ========================================================================= -->
         <div id="panelPaqueteria" class="app-panel space-y-4 hidden">
             <div id="tabsPaqueteriaContainer" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('paqueteria', 'ingresar')" id="btnSubPaqueteriaIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
                     <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Paquete
                 </button>
                 <button onclick="switchSubTab('paqueteria', 'inventario')" id="btnSubPaqueteriaInventario" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
-                    <i class="fa-solid :fa-box-open text-xl mb-1"></i> En Portería
+                    <i class="fa-solid fa-box-open mr-1"></i> En Portería
                 </button>
             </div>
 
@@ -462,11 +483,11 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Bloque</label>
-                                <input id="paqBloque" type="text" required placeholder="Bloque 3" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
+                                <input id="paqBloque" type="text" required placeholder="Bloque 3" oninput="dispararAutoLlenado('paquete')" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Apartamento</label>
-                                <input id="paqApto" type="text" required placeholder="1204" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
+                                <input id="paqApto" type="text" required placeholder="1204" oninput="dispararAutoLlenado('paquete')" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
                             </div>
                         </div>
                         <div>
@@ -516,7 +537,9 @@
             </div>
         </div>
 
+        <!-- ========================================================================= -->
         <!-- MÓDULO 5: CONFIGURACIÓN / ADMINISTRACIÓN -->
+        <!-- ========================================================================= -->
         <div id="panelConfig" class="app-panel space-y-4 hidden">
             <!-- Sección Tarifas Generales Parqueadero -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
@@ -533,6 +556,19 @@
                         <input id="tarifaMoto" type="number" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
                     </div>
                 </div>
+
+                <!-- Configuración de Horas Gratis (Nuevo requerimiento) -->
+                <div class="grid grid-cols-2 gap-3 border-t pt-3 items-center">
+                    <div class="flex items-center space-x-2 mt-2">
+                        <input id="horasGratisActivo" type="checkbox" onchange="toggleHorasGratisInput()" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
+                        <label for="horasGratisActivo" class="text-xs font-bold text-slate-600 uppercase select-none">¿Ofrecer Horas Gratis?</label>
+                    </div>
+                    <div>
+                        <label for="cantHorasGratis" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Cantidad Horas Gratis</label>
+                        <input id="cantHorasGratis" type="number" min="0" placeholder="0" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold disabled:opacity-50">
+                    </div>
+                </div>
+
                 <div>
                     <label for="correoDestino" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Correo Notificaciones</label>
                     <input id="correoDestino" type="email" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
@@ -640,8 +676,17 @@
                     </div>
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-3 pt-2">
                     <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Usuarios del Sistema</h4>
+                    
+                    <!-- Buscador dinámico de usuarios (Nuevo requerimiento) -->
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </span>
+                        <input id="buscarUsuarioInput" type="text" oninput="renderCeladoresList()" placeholder="Buscar por nombre, apto, bloque, rol..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+
                     <ul id="listaCeladores" class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
                         <!-- Lista dinámica -->
                     </ul>
@@ -651,12 +696,32 @@
 
     </main>
 
+    <!-- MODAL DE NOTIFICACIONES (ZONAS Y MUDANZAS PENDIENTES / PAQUETES PROPIETARIO) -->
+    <div id="notificacionesModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-md font-bold text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bell text-emerald-600"></i> Notificaciones Pendientes
+                </h3>
+                <button onclick="closeNotificacionesModal()" class="text-slate-400 hover:text-slate-600 focus:outline-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="notificacionesContenido" class="max-h-64 overflow-y-auto space-y-3 text-xs text-slate-600">
+                <!-- Dinámico -->
+            </div>
+            <button onclick="closeNotificacionesModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-950 text-white font-semibold rounded-xl text-xs transition focus:outline-none">
+                Cerrar Ventana
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL CAMBIAR CONTRASEÑA USUARIO (ADMIN ONLY) -->
     <div id="changePasswordModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 class="text-md font-bold text-slate-800">Cambiar Contraseña</h3>
-                <button onclick="closePasswordModal()" class="text-slate-400 hover:text-slate-600">
+                <button onclick="closePasswordModal()" class="text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -664,7 +729,7 @@
                 <p class="text-xs text-slate-500 mb-2">Nueva contraseña para: <strong id="changePassUsername" class="text-slate-700"></strong></p>
                 <input id="newUserPasswordVal" type="text" placeholder="Nueva contraseña" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
-            <button onclick="guardarNuevaPasswordUsuario()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow">
+            <button onclick="guardarNuevaPasswordUsuario()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow focus:outline-none">
                 Guardar Contraseña
             </button>
         </div>
@@ -677,7 +742,7 @@
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-receipt text-amber-500"></i> Registrar Salida
                 </h3>
-                <button onclick="closeSalidaModal()" class="text-slate-400 hover:text-slate-600">
+                <button onclick="closeSalidaModal()" class="text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -703,6 +768,11 @@
                         <span class="text-slate-500 text-sm font-semibold">Tiempo transcurrido:</span>
                         <span id="checkoutDuracion" class="font-bold text-emerald-600"></span>
                     </div>
+                    <!-- Desglose de horas gratis si aplica -->
+                    <div id="checkoutDesgloseGratis" class="hidden flex justify-between text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded">
+                        <span>Horas de cortesía aplicadas:</span>
+                        <span id="checkoutHorasGratisTxt" class="font-bold"></span>
+                    </div>
                     <hr class="my-2 border-dashed">
                     <div class="flex justify-between items-center pt-2">
                         <span class="text-slate-800 font-bold text-md">Costo Total:</span>
@@ -718,7 +788,7 @@
                         <canvas id="firmaSalidaCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
                     </div>
                 </div>
-                <button onclick="completarSalida()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                <button onclick="completarSalida()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 focus:outline-none">
                     <i class="fa-solid fa-paper-plane"></i> Finalizar Salida
                 </button>
             </div>
@@ -732,7 +802,7 @@
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-signature text-emerald-600"></i> Confirmar Entrega
                 </h3>
-                <button onclick="closeEntregaModal()" class="text-slate-400 hover:text-slate-600">
+                <button onclick="closeEntregaModal()" class="text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -751,7 +821,7 @@
                         <canvas id="firmaEntregaCanvas" class="w-full h-32 block touch-none cursor-crosshair" style="background: #f8fafc;"></canvas>
                     </div>
                 </div>
-                <button onclick="completarEntregaPaquete()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                <button onclick="completarEntregaPaquete()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2 focus:outline-none">
                     <i class="fa-solid fa-circle-check"></i> Registrar Entrega
                 </button>
             </div>
@@ -761,23 +831,23 @@
     <!-- Barra de Navegación Fija (Look App Nativa) -->
     <nav class="bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 z-40 shadow-xl hidden">
         <div class="max-w-md mx-auto flex justify-around">
-            <button onclick="switchPanel('parqueadero')" id="btnNavParqueadero" class="flex-1 py-3 flex flex-col items-center text-emerald-600">
+            <button onclick="switchPanel('parqueadero')" id="btnNavParqueadero" class="flex-1 py-3 flex flex-col items-center text-emerald-600 focus:outline-none">
                 <i class="fa-solid fa-square-parking text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Parqueo</span>
             </button>
-            <button onclick="switchPanel('zonas')" id="btnNavZonas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
+            <button onclick="switchPanel('zonas')" id="btnNavZonas" class="flex-1 py-3 flex flex-col items-center text-slate-400 focus:outline-none">
                 <i class="fa-solid fa-calendar-check text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Zonas</span>
             </button>
-            <button onclick="switchPanel('mudanzas')" id="btnNavMudanzas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
+            <button onclick="switchPanel('mudanzas')" id="btnNavMudanzas" class="flex-1 py-3 flex flex-col items-center text-slate-400 focus:outline-none">
                 <i class="fa-solid fa-truck-moving text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Mudanzas</span>
             </button>
-            <button onclick="switchPanel('paqueteria')" id="btnNavPaqueteria" class="flex-1 py-3 flex flex-col items-center text-slate-400">
+            <button onclick="switchPanel('paqueteria')" id="btnNavPaqueteria" class="flex-1 py-3 flex flex-col items-center text-slate-400 focus:outline-none">
                 <i class="fa-solid fa-box-open text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Paquetes</span>
             </button>
-            <button onclick="switchPanel('config')" id="btnNavConfig" class="flex-1 py-3 flex flex-col items-center text-slate-400 hidden">
+            <button onclick="switchPanel('config')" id="btnNavConfig" class="flex-1 py-3 flex flex-col items-center text-slate-400 hidden focus:outline-none">
                 <i class="fa-solid fa-sliders text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Admin</span>
             </button>
@@ -785,24 +855,9 @@
     </nav>
 
     <script>
-        // --- WEBHOOKOS INTEGRADOS ---
-        let defaultPush = 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
-        let defaultPull = 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
+        let webhookPush = localStorage.getItem('webhook_push_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
+        let webhookPull = localStorage.getItem('webhook_pull_url') || 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
 
-        let webhookPush = SafeStorage.getItem('webhook_push_url');
-        let webhookPull = SafeStorage.getItem('webhook_pull_url');
-
-        // Reset automático de URLs obsoletas si existen configuraciones antiguas o invertidas en caché
-        if (!webhookPush || webhookPush !== defaultPush) {
-            webhookPush = defaultPush;
-            SafeStorage.setItem('webhook_push_url', defaultPush);
-        }
-        if (!webhookPull || webhookPull !== defaultPull) {
-            webhookPull = defaultPull;
-            SafeStorage.setItem('webhook_pull_url', defaultPull);
-        }
-
-        // --- BASE DE DATOS LOCAL ---
         let db = {
             usuarios: [],
             registros: [],        // Parqueadero
@@ -812,6 +867,8 @@
             config: {
                 tarifaCarro: 3000, 
                 tarifaMoto: 1500,
+                horasGratisActivo: false,
+                cantHorasGratis: 0,
                 correoDestino: 'admin@conjunto.com',
                 zonas: [
                     { nombre: 'Salón Social', tarifa: 150000 },
@@ -867,6 +924,8 @@
                 db.config = {
                     tarifaCarro: 3000, 
                     tarifaMoto: 1500,
+                    horasGratisActivo: false,
+                    cantHorasGratis: 0,
                     correoDestino: 'admin@conjunto.com',
                     zonas: [
                         { nombre: 'Salón Social', tarifa: 150000 },
@@ -875,6 +934,8 @@
                     ]
                 };
             }
+            if (!db.config.hasOwnProperty('horasGratisActivo')) db.config.horasGratisActivo = false;
+            if (!db.config.hasOwnProperty('cantHorasGratis')) db.config.cantHorasGratis = 0;
             if (!db.config.zonas || !Array.isArray(db.config.zonas)) {
                 db.config.zonas = [
                     { nombre: 'Salón Social', tarifa: 150000 },
@@ -884,10 +945,10 @@
             }
             db.config.tarifaCarro = Number(db.config.tarifaCarro) || 3000;
             db.config.tarifaMoto = Number(db.config.tarifaMoto) || 1500;
+            db.config.cantHorasGratis = Number(db.config.cantHorasGratis) || 0;
             db.config.correoDestino = db.config.correoDestino || 'admin@conjunto.com';
         }
 
-        // --- INICIALIZACIÓN ---
         window.onload = async function() {
             const localData = SafeStorage.getItem('park_db');
             if (localData) {
@@ -918,7 +979,14 @@
             if (db && db.config) {
                 setElementValue('tarifaCarro', db.config.tarifaCarro || 3000);
                 setElementValue('tarifaMoto', db.config.tarifaMoto || 1500);
+                setElementValue('cantHorasGratis', db.config.cantHorasGratis || 0);
                 setElementValue('correoDestino', db.config.correoDestino || 'admin@conjunto.com');
+                
+                const freeCheck = document.getElementById('horasGratisActivo');
+                if (freeCheck) {
+                    freeCheck.checked = !!db.config.horasGratisActivo;
+                    toggleHorasGratisInput();
+                }
             }
 
             checkAuthentication();
@@ -927,6 +995,239 @@
 
         function saveDb() {
             SafeStorage.setItem('park_db', JSON.stringify(db));
+        }
+
+        // --- SISTEMA DE HORAS GRATIS (CONTROL DE INPUT) ---
+        function toggleHorasGratisInput() {
+            const chk = document.getElementById('horasGratisActivo');
+            const numInput = document.getElementById('cantHorasGratis');
+            if (chk && numInput) {
+                numInput.disabled = !chk.checked;
+            }
+        }
+
+        // --- SISTEMA DE AUTO-LLENADO DE PROPIETARIOS ---
+        function dispararAutoLlenado(modulo) {
+            let bloqueVal = '';
+            let aptoVal = '';
+            let targetId = '';
+
+            if (modulo === 'zona') {
+                bloqueVal = document.getElementById('zonaBloque').value.trim();
+                aptoVal = document.getElementById('zonaApto').value.trim();
+                targetId = 'zonaNombre';
+            } else if (modulo === 'paquete') {
+                bloqueVal = document.getElementById('paqBloque').value.trim();
+                aptoVal = document.getElementById('paqApto').value.trim();
+                targetId = 'paqDestinatario';
+            }
+
+            if (!bloqueVal || !aptoVal) return;
+
+            // Buscar en usuarios al propietario
+            const prop = db.usuarios.find(u => 
+                u && u.rol === 'Propietario' && 
+                u.bloque && u.apto &&
+                u.bloque.toLowerCase() === bloqueVal.toLowerCase() && 
+                u.apto.toLowerCase() === aptoVal.toLowerCase()
+            );
+
+            if (prop) {
+                const targetInput = document.getElementById(targetId);
+                if (targetInput) {
+                    targetInput.value = prop.name;
+                    showToast(`Propietario localizado: ${prop.name}. Campos autocompletados.`, 'success');
+                }
+            }
+        }
+
+        // --- SISTEMA DE NOTIFICACIONES EN EL HEADER ---
+        function updateHeaderNotifications() {
+            const btnAdmin = document.getElementById('btnNotifAdmin');
+            const btnProp = document.getElementById('btnNotifProp');
+            const badgeAdmin = document.getElementById('badgeCountNotifAdmin');
+            const badgeProp = document.getElementById('badgeCountNotifProp');
+
+            if (!activeUser) {
+                if (btnAdmin) btnAdmin.classList.add('hidden');
+                if (btnProp) btnProp.classList.add('hidden');
+                return;
+            }
+
+            if (activeUser.rol === 'Administrador' || activeUser.rol === 'Celador') {
+                if (btnProp) btnProp.classList.add('hidden');
+                if (btnAdmin) btnAdmin.classList.remove('hidden');
+
+                const pendingRes = db.reservas.filter(r => r && r.estado === 'Pendiente').length;
+                const pendingMud = db.mudanzas.filter(m => m && m.estado !== 'Autorizado').length;
+                const totalPending = pendingRes + pendingMud;
+
+                if (badgeAdmin) {
+                    badgeAdmin.innerText = totalPending;
+                    if (totalPending > 0) {
+                        badgeAdmin.classList.remove('hidden');
+                        btnAdmin.classList.add('animate-bounce'); // Efecto dinámico llamativo
+                    } else {
+                        badgeAdmin.classList.add('hidden');
+                        btnAdmin.classList.remove('animate-bounce');
+                    }
+                }
+            } else if (activeUser.rol === 'Propietario') {
+                if (btnAdmin) btnAdmin.classList.add('hidden');
+                if (btnProp) btnProp.classList.remove('hidden');
+
+                // Paquetes pendientes para este propietario
+                const pendingPaq = db.paquetes.filter(p => 
+                    p && p.estado === 'Pendiente' && 
+                    p.bloque && p.apto &&
+                    p.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && 
+                    p.apto.toLowerCase() === activeUser.apto.toLowerCase()
+                ).length;
+
+                if (badgeProp) {
+                    badgeProp.innerText = pendingPaq;
+                    if (pendingPaq > 0) {
+                        badgeProp.classList.remove('hidden');
+                        btnProp.classList.add('animate-pulse');
+                    } else {
+                        badgeProp.classList.add('hidden');
+                        btnProp.classList.remove('animate-pulse');
+                    }
+                }
+            } else {
+                if (btnAdmin) btnAdmin.classList.add('hidden');
+                if (btnProp) btnProp.classList.add('hidden');
+            }
+        }
+
+        function abrirNotificacionesModal() {
+            const content = document.getElementById('notificacionesContenido');
+            if (!content || !activeUser) return;
+            content.innerHTML = '';
+
+            if (activeUser.rol === 'Administrador' || activeUser.rol === 'Celador') {
+                const pendingRes = db.reservas.filter(r => r && r.estado === 'Pendiente');
+                const pendingMud = db.mudanzas.filter(m => m && m.estado !== 'Autorizado');
+
+                if (pendingRes.length === 0 && pendingMud.length === 0) {
+                    content.innerHTML = `
+                        <div class="text-center py-4 text-slate-400">
+                            <i class="fa-solid fa-circle-check text-2xl text-emerald-500 mb-1"></i>
+                            <p class="text-xs">No hay reservas ni mudanzas pendientes de aprobación.</p>
+                        </div>
+                    `;
+                } else {
+                    if (pendingRes.length > 0) {
+                        const t = document.createElement('div');
+                        t.className = 'font-bold text-slate-800 border-b pb-1 mb-1.5 uppercase tracking-wider text-[10px] text-emerald-600';
+                        t.innerText = 'Reservas Pendientes';
+                        content.appendChild(t);
+
+                        pendingRes.forEach(r => {
+                            const d = document.createElement('div');
+                            d.className = 'p-2 bg-amber-50 border border-amber-100 rounded-lg flex justify-between items-center mb-1.5';
+                            d.innerHTML = `
+                                <div class="min-w-0 flex-1 pr-2">
+                                    <strong class="text-slate-700">${r.zona}</strong><br>
+                                    <span class="text-[9px] text-slate-500 truncate block">Blq ${r.bloque} - Apt ${r.apto} | ${r.fecha}</span>
+                                </div>
+                                <button onclick="aprobarReserva('${r.id}'); abrirNotificacionesModal();" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[9px] transition-colors focus:outline-none">
+                                    Aprobar
+                                </button>
+                            `;
+                            content.appendChild(d);
+                        });
+                    }
+
+                    if (pendingMud.length > 0) {
+                        const t = document.createElement('div');
+                        t.className = 'font-bold text-slate-800 border-b pb-1 mt-3 mb-1.5 uppercase tracking-wider text-[10px] text-indigo-600';
+                        t.innerText = 'Mudanzas por Autorizar';
+                        content.appendChild(t);
+
+                        pendingMud.forEach(m => {
+                            const d = document.createElement('div');
+                            d.className = 'p-2 bg-amber-50 border border-amber-100 rounded-lg flex justify-between items-center mb-1.5';
+                            d.innerHTML = `
+                                <div class="min-w-0 flex-1 pr-2">
+                                    <strong class="text-slate-700">Trasteo ${m.tipo}</strong><br>
+                                    <span class="text-[9px] text-slate-500 truncate block">Blq ${m.bloque} - Apt ${m.apto} | ${m.fecha}</span>
+                                </div>
+                                <button onclick="aprobarMudanza('${m.id}'); abrirNotificacionesModal();" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[9px] transition-colors focus:outline-none">
+                                    Aprobar
+                                </button>
+                            `;
+                            content.appendChild(d);
+                        });
+                    }
+                }
+            } else if (activeUser.rol === 'Propietario') {
+                const pendingPaq = db.paquetes.filter(p => 
+                    p && p.estado === 'Pendiente' && 
+                    p.bloque && p.apto &&
+                    p.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && 
+                    p.apto.toLowerCase() === activeUser.apto.toLowerCase()
+                );
+
+                if (pendingPaq.length === 0) {
+                    content.innerHTML = `
+                        <div class="text-center py-4 text-slate-400">
+                            <i class="fa-solid fa-face-smile-wink text-2xl text-emerald-500 mb-1"></i>
+                            <p class="text-xs">¡Al día! No tienes encomiendas pendientes por retirar.</p>
+                        </div>
+                    `;
+                } else {
+                    const t = document.createElement('div');
+                    t.className = 'font-bold text-slate-800 border-b pb-1 mb-2 uppercase tracking-wider text-[10px] text-indigo-600';
+                    t.innerText = `Tienes ${pendingPaq.length} Encomienda(s) en Portería`;
+                    content.appendChild(t);
+
+                    pendingPaq.forEach(p => {
+                        const d = document.createElement('div');
+                        d.className = 'p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg mb-1.5';
+                        d.innerHTML = `
+                            <div>
+                                <span class="font-bold text-indigo-950">${p.courier}</span><br>
+                                <span class="text-[10px] text-slate-600">Para: ${p.destinatario}</span><br>
+                                <span class="text-[9px] text-slate-400 block mt-1">Llegó: ${new Date(p.fechaRecibido).toLocaleDateString()}</span>
+                            </div>
+                        `;
+                        content.appendChild(d);
+                    });
+                }
+            }
+
+            document.getElementById('notificacionesModal').classList.remove('hidden');
+        }
+
+        function closeNotificacionesModal() {
+            document.getElementById('notificacionesModal').classList.add('hidden');
+        }
+
+        // --- ACCIÓN DE APROBAR RESERVAS Y MUDANZAS (Celador y Admin) ---
+        async function aprobarReserva(id) {
+            const res = db.reservas.find(r => r && r.id === id);
+            if (res) {
+                res.estado = 'Aprobado';
+                saveDb();
+                renderReservas();
+                updateHeaderNotifications();
+                showToast('Reserva aprobada con éxito de forma local.');
+                await pushToCloud('REGISTRAR_RESERVA', res); // Actualizar en el Sheet mediante acción n8n
+            }
+        }
+
+        async function aprobarMudanza(id) {
+            const mud = db.mudanzas.find(m => m && m.id === id);
+            if (mud) {
+                mud.estado = 'Autorizado';
+                mud.pazYSalvo = true;
+                saveDb();
+                renderMudanzas();
+                updateHeaderNotifications();
+                showToast('Mudanza autorizada con éxito de forma local.');
+                await pushToCloud('REGISTRAR_MUDANZA', mud); // Actualizar en el Sheet mediante acción n8n
+            }
         }
 
         // --- PESTAÑAS DE LOGIN / REGISTRO ---
@@ -963,7 +1264,6 @@
                 return;
             }
 
-            // Validación segura de duplicidad por Bloque y Apartamento (Evitando nulos)
             const apartamentoDuplicado = db.usuarios.some(u => 
                 u && u.rol === 'Propietario' && 
                 u.bloque && u.apto &&
@@ -976,7 +1276,6 @@
                 return;
             }
 
-            // Duplicidad de correo / username
             const correoDuplicado = db.usuarios.some(u => u && u.username && u.username.toLowerCase() === email.toLowerCase());
             if (correoDuplicado) {
                 showToast('Este correo ya está registrado.', 'error');
@@ -1000,7 +1299,6 @@
 
             showToast('Cuenta de propietario creada localmente.');
 
-            // Sincronizar usuario con la nube (n8n)
             const syncExito = await pushToCloud('CREAR_USUARIO', {
                 usuariosActualizados: db.usuarios,
                 usuarioCreado: nuevoPropietario
@@ -1010,7 +1308,6 @@
                 showToast('Usuario sincronizado con Google Sheets.');
             }
 
-            // Login automático del nuevo propietario registrado
             SafeSession.setItem('park_session', JSON.stringify(nuevoPropietario));
             checkAuthentication();
             showToast(`Sesión iniciada como Propietario de ${bloque} - ${apto}`);
@@ -1097,7 +1394,6 @@
             const nav = document.querySelector('nav');
             const loginSection = document.getElementById('loginSection');
 
-            // Intento seguro de parsear sesión activa para evitar caídas
             if (session && session !== 'undefined' && session !== 'null') {
                 try {
                     activeUser = JSON.parse(session);
@@ -1117,6 +1413,7 @@
                 if (nav) nav.classList.remove('hidden');
                 updateNavbarForRole();
                 prefillForms();
+                updateHeaderNotifications();
             } else {
                 if (loginSection) loginSection.classList.remove('hidden');
                 if (header) header.classList.add('hidden');
@@ -1300,6 +1597,7 @@
                         renderMudanzas();
                         renderPaquetes();
                         renderDynamicZones();
+                        updateHeaderNotifications();
 
                         actualizarBadgeSincronizacion(true, "Nube OK");
                     }
@@ -1436,7 +1734,6 @@
                 const icon = reg.tipo === 'Carro' ? 'fa-car' : 'fa-motorcycle';
                 const formatTime = new Date(reg.horaIngreso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                // Ocultar acciones de llamada y botones de cobro/salida si el usuario conectado es Propietario
                 const esPropietario = activeUser && activeUser.rol === 'Propietario';
                 const contactoHtml = esPropietario ? '' : `
                     <div class="flex justify-between items-center text-xs border-t pt-2 text-slate-600">
@@ -1479,7 +1776,7 @@
             });
         }
 
-        // --- SALIDAS PARQUEADERO ---
+        // --- SALIDAS PARQUEADERO CON HORAS GRATIS ---
         function abrirSalidaModal(id) {
             activeCheckoutId = id;
             const reg = db.registros.find(r => r && r.id === id);
@@ -1492,10 +1789,15 @@
             const totalMinutes = Math.floor(durationMs / (1000 * 60));
             const hours = Math.floor(totalMinutes / 60);
             const minutes = totalMinutes % 60;
-            const hoursToCharge = Math.ceil(durationMs / (1000 * 60 * 60)) || 1; 
+            const hoursToChargeTotal = Math.ceil(durationMs / (1000 * 60 * 60)) || 1; 
+
+            // Aplicar Horas Gratis si está configurado en el Admin (Nuevo requerimiento)
+            const esHorasGratisActivo = !!db.config.horasGratisActivo;
+            const cantHorasGratis = Number(db.config.cantHorasGratis) || 0;
+            const horasACobrarNeto = esHorasGratisActivo ? Math.max(0, hoursToChargeTotal - cantHorasGratis) : hoursToChargeTotal;
 
             const rate = reg.tipo === 'Carro' ? db.config.tarifaCarro : db.config.tarifaMoto;
-            const cost = hoursToCharge * rate;
+            const cost = horasACobrarNeto * rate;
 
             const setInnerText = (id, text) => {
                 const el = document.getElementById(id);
@@ -1504,8 +1806,20 @@
 
             setInnerText('checkoutPlaca', reg.placa);
             setInnerText('checkoutIngreso', entryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + entryDate.toLocaleDateString() + ')');
-            setInnerText('checkoutDuracion', `${hours}h ${minutes}m (Cobro: ${hoursToCharge}h)`);
+            setInnerText('checkoutDuracion', `${hours}h ${minutes}m (Cobro: ${horasACobrarNeto}h)`);
             
+            // Mostrar u ocultar el desglose de horas gratis de cortesía en el recibo
+            const desgloseEl = document.getElementById('checkoutDesgloseGratis');
+            const horasGratisTxt = document.getElementById('checkoutHorasGratisTxt');
+            if (desgloseEl && horasGratisTxt) {
+                if (esHorasGratisActivo && cantHorasGratis > 0) {
+                    desgloseEl.classList.remove('hidden');
+                    horasGratisTxt.innerText = `-${cantHorasGratis} horas (Total real: ${hoursToChargeTotal}h)`;
+                } else {
+                    desgloseEl.classList.add('hidden');
+                }
+            }
+
             const formattedCost = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(cost);
             setInnerText('checkoutCosto', formattedCost);
 
@@ -1625,6 +1939,7 @@
             db.reservas.unshift(nuevaReserva);
             saveDb();
             renderReservas();
+            updateHeaderNotifications();
             showToast('Reserva agendada localmente.');
 
             await pushToCloud('REGISTRAR_RESERVA', nuevaReserva);
@@ -1668,17 +1983,26 @@
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm space-y-2 text-xs";
                 
-                // Enlaces directos de contacto para el celador
-                let contactoHtml = '';
+                // Enlaces de contacto y botón de Aprobación para Celador/Admin (Nuevo requerimiento)
+                let accionesHtml = '';
                 if (activeUser.rol === 'Celador' || activeUser.rol === 'Administrador') {
-                    contactoHtml = `
-                        <div class="flex gap-1 pt-1.5 border-t border-slate-100 mt-2">
-                            <a href="tel:${res.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
-                                <i class="fa-solid fa-phone"></i> Llamar
-                            </a>
-                            <a href="mailto:${res.email || ''}?subject=Sobre tu reserva de ${res.zona}" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
-                                <i class="fa-solid fa-envelope"></i> Correo
-                            </a>
+                    const btnAprobar = res.estado === 'Pendiente' ? `
+                        <button onclick="aprobarReserva('${res.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-circle-check"></i> Aprobar
+                        </button>
+                    ` : '';
+
+                    accionesHtml = `
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 mt-2">
+                            <div class="flex gap-1">
+                                <a href="tel:${res.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1.5 rounded flex items-center gap-1 transition text-[10px]">
+                                    <i class="fa-solid fa-phone"></i> Llamar
+                                </a>
+                                <a href="mailto:${res.email || ''}?subject=Sobre tu reserva de ${res.zona}" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1.5 rounded flex items-center gap-1 transition text-[10px]">
+                                    <i class="fa-solid fa-envelope"></i> Correo
+                                </a>
+                            </div>
+                            ${btnAprobar}
                         </div>
                     `;
                 }
@@ -1693,7 +2017,7 @@
                         <div><strong>Uso:</strong> ${res.fecha} a las ${res.hora}</div>
                         <div><strong>Pago:</strong> ${res.metodo === 'Soporte' ? 'Recibo Adjunto' : 'Cargar a Factura'}</div>
                     </div>
-                    ${contactoHtml}
+                    ${accionesHtml}
                 `;
                 container.appendChild(card);
             });
@@ -1729,6 +2053,7 @@
             db.mudanzas.unshift(nuevaMudanza);
             saveDb();
             renderMudanzas();
+            updateHeaderNotifications();
             showToast('Mudanza agendada localmente.');
 
             await pushToCloud('REGISTRAR_MUDANZA', nuevaMudanza);
@@ -1762,22 +2087,31 @@
 
             listado.forEach(mud => {
                 if (!mud) return;
-                const badgeColor = mud.pazYSalvo ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
-                const statusIcon = mud.pazYSalvo ? 'fa-circle-check text-emerald-500' : 'fa-circle-xmark text-rose-500';
+                const badgeColor = mud.estado === 'Autorizado' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                const statusIcon = mud.estado === 'Autorizado' ? 'fa-circle-check text-emerald-500' : 'fa-circle-xmark text-rose-500';
 
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm space-y-2 text-xs";
                 
-                let contactoHtml = '';
+                let accionesHtml = '';
                 if (activeUser.rol === 'Celador' || activeUser.rol === 'Administrador') {
-                    contactoHtml = `
-                        <div class="flex gap-1 pt-1.5 border-t border-slate-100 mt-2">
-                            <a href="tel:${mud.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
-                                <i class="fa-solid fa-phone"></i> Llamar
-                            </a>
-                            <a href="mailto:${mud.email || ''}?subject=Sobre tu mudanza programada" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1 rounded flex items-center gap-1 transition text-[10px]">
-                                <i class="fa-solid fa-envelope"></i> Correo
-                            </a>
+                    const btnAprobar = mud.estado !== 'Autorizado' ? `
+                        <button onclick="aprobarMudanza('${mud.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-circle-check"></i> Aprobar
+                        </button>
+                    ` : '';
+
+                    accionesHtml = `
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 mt-2">
+                            <div class="flex gap-1">
+                                <a href="tel:${mud.telefono || ''}" class="bg-slate-100 hover:bg-slate-200 text-emerald-600 font-bold px-2 py-1.5 rounded flex items-center gap-1 transition text-[10px]">
+                                    <i class="fa-solid fa-phone"></i> Llamar
+                                </a>
+                                <a href="mailto:${mud.email || ''}?subject=Sobre tu mudanza programada" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-bold px-2 py-1.5 rounded flex items-center gap-1 transition text-[10px]">
+                                    <i class="fa-solid fa-envelope"></i> Correo
+                                </a>
+                            </div>
+                            ${btnAprobar}
                         </div>
                     `;
                 }
@@ -1794,10 +2128,10 @@
                         <div><strong>Operarios:</strong> <span class="text-slate-500 font-mono">${mud.operarios}</span></div>
                         <div class="flex items-center gap-1.5 pt-1">
                             <i class="fa-solid ${statusIcon}"></i>
-                            <span class="font-bold uppercase text-[10px]">${mud.pazYSalvo ? 'Paz y Salvo Confirmado' : 'Pendiente de Cartera'}</span>
+                            <span class="font-bold uppercase text-[10px]">${mud.estado === 'Autorizado' ? 'Paz y Salvo Autorizado' : 'Bloqueado por Cartera'}</span>
                         </div>
                     </div>
-                    ${contactoHtml}
+                    ${accionesHtml}
                 `;
                 container.appendChild(card);
             });
@@ -1825,7 +2159,6 @@
             const destinatario = document.getElementById('paqDestinatario').value.trim();
             const courier = document.getElementById('paqCourier').value;
 
-            // Encontrar email y teléfono del propietario de ese apartamento si ya existe
             const prop = db.usuarios.find(u => 
                 u && u.rol === 'Propietario' && 
                 u.bloque && u.apto &&
@@ -1849,6 +2182,7 @@
             db.paquetes.unshift(nuevoPaquete);
             saveDb();
             renderPaquetes();
+            updateHeaderNotifications();
             showToast('Paquete registrado localmente.');
 
             await pushToCloud('REGISTRAR_PAQUETE', nuevoPaquete);
@@ -1867,9 +2201,9 @@
 
             if (!activeUser) return;
 
-            // Filtrado blindado: Si es Propietario, solo ve sus propios paquetes
+            // Filtrado blindado por propietario si aplica
             const pendientes = db.paquetes.filter(p => {
-                if (!p || (p.estado !== 'Pending' && p.estado !== 'Pendiente')) return false;
+                if (!p || p.estado !== 'Pendiente') return false;
                 if (activeUser.rol === 'Propietario') {
                     return p.bloque && p.apto && activeUser.bloque && activeUser.apto && p.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && p.apto.toLowerCase() === activeUser.apto.toLowerCase();
                 }
@@ -1911,10 +2245,9 @@
                     `;
                 }
 
-                // Ocultar botón de firma para el propietario
                 const esPropietario = activeUser.rol === 'Propietario';
                 const botonEntregaHtml = esPropietario ? '' : `
-                    <button onclick="abrirEntregaPaqueteModal('${paq.id}')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors">
+                    <button onclick="abrirEntregaPaqueteModal('${paq.id}')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none">
                         <i class="fa-solid fa-signature"></i> Firmar y Entregar
                     </button>
                 `;
@@ -1979,6 +2312,7 @@
             saveDb();
             renderPaquetes();
             closeEntregaModal();
+            updateHeaderNotifications();
             showToast('Paquete entregado correctamente.');
 
             await pushToCloud('ENTREGAR_PAQUETE', paq);
@@ -1988,6 +2322,10 @@
         async function guardarConfiguracion() {
             db.config.tarifaCarro = parseInt(document.getElementById('tarifaCarro').value) || 3000;
             db.config.tarifaMoto = parseInt(document.getElementById('tarifaMoto').value) || 1500;
+            
+            db.config.horasGratisActivo = document.getElementById('horasGratisActivo').checked;
+            db.config.cantHorasGratis = parseInt(document.getElementById('cantHorasGratis').value) || 0;
+            
             db.config.correoDestino = document.getElementById('correoDestino').value.trim();
 
             saveDb();
@@ -2008,13 +2346,41 @@
             }
         }
 
-        // --- RENDERIZADO Y CONTROL DE USUARIOS (Celadores/Propietarios/Admin) ---
+        // --- RENDERIZADO Y CONTROL DE USUARIOS CON BUSCADOR ---
         function renderCeladoresList() {
             const list = document.getElementById('listaCeladores');
             if (!list) return;
             list.innerHTML = '';
-            db.usuarios.forEach(c => {
-                if (!c) return;
+
+            // Obtener el término del buscador (Nuevo requerimiento)
+            const query = document.getElementById('buscarUsuarioInput') ? document.getElementById('buscarUsuarioInput').value.trim().toLowerCase() : '';
+
+            // Filtrar usuarios en base al buscador
+            const usuariosFiltrados = db.usuarios.filter(c => {
+                if (!c) return false;
+                if (!query) return true;
+                
+                const name = (c.name || '').toLowerCase();
+                const username = (c.username || '').toLowerCase();
+                const bloque = (c.bloque || '').toLowerCase();
+                const apto = (c.apto || '').toLowerCase();
+                const phone = (c.phone || '').toLowerCase();
+                const rol = (c.rol || '').toLowerCase();
+
+                return name.includes(query) || 
+                       username.includes(query) || 
+                       bloque.includes(query) || 
+                       apto.includes(query) || 
+                       phone.includes(query) || 
+                       rol.includes(query);
+            });
+
+            if (usuariosFiltrados.length === 0) {
+                list.innerHTML = `<li class="text-center py-4 text-xs text-slate-400">Ningún usuario coincide con la búsqueda.</li>`;
+                return;
+            }
+
+            usuariosFiltrados.forEach(c => {
                 const isClientAdmin = c.rol === 'Administrador';
                 const isPropietario = c.rol === 'Propietario';
                 const icon = isClientAdmin ? 'fa-user-gear text-amber-500' : (isPropietario ? 'fa-home text-indigo-500' : 'fa-user-shield text-slate-400');
@@ -2036,6 +2402,7 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-1.5 flex-shrink-0">
+                        <!-- Botón para Cambiar Contraseña (Nuevo requerimiento) -->
                         <button onclick="cambiarPasswordUsuarioPrompt('${c.username}')" class="text-amber-500 hover:text-amber-700 p-1" title="Cambiar Contraseña">
                             <i class="fa-solid fa-key text-base"></i>
                         </button>
@@ -2056,7 +2423,7 @@
             const rolEl = document.getElementById('nuevoCeladorRol');
             const emailEl = document.getElementById('nuevoCeladorEmail');
 
-            if (!nameEl || !usernameEl || !passEl || !phoneEl || !colno || !rolEl || !emailEl) return;
+            if (!nameEl || !usernameEl || !passEl || !phoneEl || !rolEl || !emailEl) return;
 
             const name = nameEl.value.trim();
             const username = usernameEl.value.trim().toLowerCase();
