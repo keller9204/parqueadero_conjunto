@@ -24,6 +24,66 @@
             display: none;
         }
     </style>
+    <script>
+        // Gestores seguros de almacenamiento para prevenir bloqueos por Sandbox de Iframes
+        const SafeStorage = {
+            getItem(key) {
+                try { return localStorage.getItem(key); } catch (e) { return null; }
+            },
+            setItem(key, value) {
+                try { localStorage.setItem(key, value); } catch (e) {}
+            },
+            clear() {
+                try { localStorage.clear(); } catch (e) {}
+            }
+        };
+
+        const SafeSession = {
+            getItem(key) {
+                try { return sessionStorage.getItem(key); } catch (e) { return null; }
+            },
+            setItem(key, value) {
+                try { sessionStorage.setItem(key, value); } catch (e) {}
+            },
+            removeItem(key) {
+                try { sessionStorage.removeItem(key); } catch (e) {}
+            },
+            clear() {
+                try { sessionStorage.clear(); } catch (e) {}
+            }
+        };
+
+        window.onerror = function(message, source, lineno, colno, error) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed inset-0 bg-slate-950 text-white p-6 z-[9999] flex flex-col items-center justify-center text-center space-y-4 overflow-y-auto';
+            errorDiv.innerHTML = `
+                <div class="bg-rose-600 w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg shadow-rose-600/30 animate-bounce">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h2 class="text-xl font-black text-rose-500">Error de Inicialización Detectado</h2>
+                <p class="text-xs text-slate-300 max-w-sm">Hemos evitado una pantalla en blanco. El navegador reporta el siguiente error técnico:</p>
+                <div class="text-left bg-slate-900 border border-slate-800 p-4 rounded-xl text-[10px] font-mono max-w-sm w-full break-all space-y-1">
+                    <div><span class="text-slate-500">Msg:</span> <span class="text-rose-300">${message}</span></div>
+                    <div><span class="text-slate-500">File:</span> <span class="text-slate-300">${source}</span></div>
+                    <div><span class="text-slate-500">Line:</span> <span class="text-emerald-400">${lineno}</span> | <span class="text-slate-500">Col:</span> ${colno}</div>
+                </div>
+                <div class="flex gap-2 w-full max-w-sm pt-2">
+                    <button onclick="SafeStorage.clear(); SafeSession.clear(); window.location.reload();" class="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition">
+                        Limpiar Caché y Reintentar
+                    </button>
+                    <button onclick="window.location.reload();" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition">
+                        Recargar Simple
+                    </button>
+                </div>
+            `;
+            if (document.body) {
+                document.body.appendChild(errorDiv);
+            } else {
+                document.documentElement.appendChild(errorDiv);
+            }
+            return false;
+        };
+    </script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-24">
 
@@ -127,9 +187,7 @@
         <!-- Contenedor de Alertas Personalizado -->
         <div id="toastContainer" class="fixed top-16 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm z-50 pointer-events-none"></div>
 
-        <!-- ========================================================================= -->
         <!-- MÓDULO 1: CONTROL DE PARQUEADERO (VISITANTES) -->
-        <!-- ========================================================================= -->
         <div id="panelParqueadero" class="app-panel space-y-4">
             <div id="tabParqueaderoNavegacion" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('parqueadero', 'ingresar')" id="btnSubParqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
@@ -218,9 +276,7 @@
             </div>
         </div>
 
-        <!-- ========================================================================= -->
         <!-- MÓDULO 2: CONTROL Y RESERVA DE ZONAS COMUNES -->
-        <!-- ========================================================================= -->
         <div id="panelZonas" class="app-panel space-y-4 hidden">
             <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('zonas', 'reservar')" id="btnSubZonasReservar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
@@ -265,7 +321,7 @@
                                 <input id="zonaFecha" type="date" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                             <div>
-                                <label for="zonaHora" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Inicio</label>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Inicio</label>
                                 <input id="zonaHora" type="time" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-xs">
                             </div>
                         </div>
@@ -306,9 +362,7 @@
             </div>
         </div>
 
-        <!-- ========================================================================= -->
         <!-- MÓDULO 3: REGISTRO EXTENDIDO DE MUDANZAS Y TRASTEOS -->
-        <!-- ========================================================================= -->
         <div id="panelMudanzas" class="app-panel space-y-4 hidden">
             <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                 <button onclick="switchSubTab('mudanzas', 'registrar')" id="btnSubMudRegistrar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
@@ -348,12 +402,12 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Empresa de Trasteos</label>
-                            <input id="mudEmpresa" type="text" required placeholder="Mudanzas Express S.A.S." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            <input id="mudEmpresa" type="text" required placeholder="Mudanzas Express S.A.S." class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Placa Camión</label>
-                                <input id="mudPlaca" type="text" required placeholder="SXP-872" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono uppercase">
+                                <input id="mudPlaca" type="text" required placeholder="SXP-872" class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl font-mono uppercase">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Tipo Trasteo</label>
@@ -387,15 +441,13 @@
             </div>
         </div>
 
-        <!-- ========================================================================= -->
         <!-- MÓDULO 4: ALERTAS DE CORRESPONDENCIA Y PAQUETERÍA EXPRESS -->
-        <!-- ========================================================================= -->
         <div id="panelPaqueteria" class="app-panel space-y-4 hidden">
             <div id="tabsPaqueteriaContainer" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100">
-                <button onclick="switchSubTab('paqueteria', 'ingresar')" id="btnSubPaqIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
+                <button onclick="switchSubTab('paqueteria', 'ingresar')" id="btnSubPaqueteriaIngresar" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-emerald-700 bg-emerald-50">
                     <i class="fa-solid fa-plus-circle mr-1"></i> Registrar Paquete
                 </button>
-                <button onclick="switchSubTab('paqueteria', 'inventario')" id="btnSubPaqInventario" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
+                <button onclick="switchSubTab('paqueteria', 'inventario')" id="btnSubPaqueteriaInventario" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
                     <i class="fa-solid fa-boxes-stacked mr-1"></i> En Portería
                 </button>
             </div>
@@ -464,9 +516,7 @@
             </div>
         </div>
 
-        <!-- ========================================================================= -->
         <!-- MÓDULO 5: CONFIGURACIÓN / ADMINISTRACIÓN -->
-        <!-- ========================================================================= -->
         <div id="panelConfig" class="app-panel space-y-4 hidden">
             <!-- Sección Tarifas Generales Parqueadero -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
@@ -638,11 +688,19 @@
                         <span id="checkoutPlaca" class="font-mono font-bold text-slate-800"></span>
                     </div>
                     <div class="flex justify-between">
+                        <span class="text-slate-500 text-sm font-semibold">Tipo:</span>
+                        <span id="checkoutTipo" class="font-bold text-slate-800"></span>
+                    </div>
+                    <div class="flex justify-between">
                         <span class="text-slate-500 text-sm font-semibold">Ingreso:</span>
                         <span id="checkoutIngreso" class="text-sm font-semibold text-slate-800"></span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500 text-sm font-semibold">Duración:</span>
+                        <span class="text-slate-500 text-sm font-semibold">Salida:</span>
+                        <span id="checkoutSalida" class="text-sm font-semibold text-slate-800"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 text-sm font-semibold">Tiempo transcurrido:</span>
                         <span id="checkoutDuracion" class="font-bold text-emerald-600"></span>
                     </div>
                     <hr class="my-2 border-dashed">
@@ -708,7 +766,7 @@
                 <span class="text-[9px] font-bold tracking-wider uppercase">Parqueo</span>
             </button>
             <button onclick="switchPanel('zonas')" id="btnNavZonas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
-                <i class="fa-solid fa-calendar-check text-xl mb-1"></i>
+                <i class="fa-solid :fa-calendar-check text-xl mb-1"></i>
                 <span class="text-[9px] font-bold tracking-wider uppercase">Zonas</span>
             </button>
             <button onclick="switchPanel('mudanzas')" id="btnNavMudanzas" class="flex-1 py-3 flex flex-col items-center text-slate-400">
@@ -727,21 +785,21 @@
     </nav>
 
     <script>
-        // --- WEBHOOKS INTEGRADOS (Actualizados y Auto-limpiados de caché de localStorage anterior) ---
+        // --- WEBHOOKS INTEGRADOS ---
         let defaultPush = 'https://n8n.srv1333424.hstgr.cloud/webhook/leerdatos';
         let defaultPull = 'https://n8n.srv1333424.hstgr.cloud/webhook/escribirdatos';
 
-        let webhookPush = localStorage.getItem('webhook_push_url');
-        let webhookPull = localStorage.getItem('webhook_pull_url');
+        let webhookPush = SafeStorage.getItem('webhook_push_url');
+        let webhookPull = SafeStorage.getItem('webhook_pull_url');
 
-        // Reset automático si existen configuraciones con las URLs de webhooks antiguos en el navegador del usuario
+        // Reset automático de URLs obsoletas si existen configuraciones antiguas en caché
         if (!webhookPush || webhookPush.includes('procesar-accion') || webhookPush.includes('procesar_accion')) {
             webhookPush = defaultPush;
-            localStorage.setItem('webhook_push_url', defaultPush);
+            SafeStorage.setItem('webhook_push_url', defaultPush);
         }
         if (!webhookPull || webhookPull.includes('obtener-datos') || webhookPull.includes('obtener_datos')) {
             webhookPull = defaultPull;
-            localStorage.setItem('webhook_pull_url', defaultPull);
+            SafeStorage.setItem('webhook_pull_url', defaultPull);
         }
 
         // --- BASE DE DATOS LOCAL ---
@@ -829,6 +887,48 @@
             db.config.correoDestino = db.config.correoDestino || 'admin@conjunto.com';
         }
 
+        // --- INICIALIZACIÓN ---
+        window.onload = async function() {
+            const localData = SafeStorage.getItem('park_db');
+            if (localData) {
+                try { db = JSON.parse(localData); } catch (e) { console.warn(e); }
+            }
+            sanitizeDb();
+
+            const setElementValue = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) element.value = value;
+            };
+
+            setElementValue('webhookPushUrl', webhookPush);
+            setElementValue('webhookPullUrl', webhookPull);
+
+            setupCanvas('firmaIngresoCanvas');
+            setupCanvas('firmaSalidaCanvas');
+            setupCanvas('firmaEntregaCanvas');
+
+            renderActivos();
+            renderDynamicZones();
+            renderReservas();
+            renderMudanzas();
+            renderPaquetes();
+            renderCeladoresList();
+            renderZonasAdminList();
+            
+            if (db && db.config) {
+                setElementValue('tarifaCarro', db.config.tarifaCarro || 3000);
+                setElementValue('tarifaMoto', db.config.tarifaMoto || 1500);
+                setElementValue('correoDestino', db.config.correoDestino || 'admin@conjunto.com');
+            }
+
+            checkAuthentication();
+            await pullFromCloud();
+        };
+
+        function saveDb() {
+            SafeStorage.setItem('park_db', JSON.stringify(db));
+        }
+
         // --- PESTAÑAS DE LOGIN / REGISTRO ---
         function switchLoginTab(tab) {
             const tabLoginBtn = document.getElementById('tabLoginBtn');
@@ -863,9 +963,10 @@
                 return;
             }
 
-            // Validación de duplicidad por Bloque y Apartamento (Rol Propietario)
+            // Validación segura de duplicidad por Bloque y Apartamento (Evitando nulos)
             const apartamentoDuplicado = db.usuarios.some(u => 
-                u.rol === 'Propietario' && 
+                u && u.rol === 'Propietario' && 
+                u.bloque && u.apto &&
                 u.bloque.toLowerCase() === bloque.toLowerCase() && 
                 u.apto.toLowerCase() === apto.toLowerCase()
             );
@@ -876,7 +977,7 @@
             }
 
             // Duplicidad de correo / username
-            const correoDuplicado = db.usuarios.some(u => u.username.toLowerCase() === email.toLowerCase());
+            const correoDuplicado = db.usuarios.some(u => u && u.username && u.username.toLowerCase() === email.toLowerCase());
             if (correoDuplicado) {
                 showToast('Este correo ya está registrado.', 'error');
                 return;
@@ -910,7 +1011,7 @@
             }
 
             // Login automático del nuevo propietario registrado
-            sessionStorage.setItem('park_session', JSON.stringify(nuevoPropietario));
+            SafeSession.setItem('park_session', JSON.stringify(nuevoPropietario));
             checkAuthentication();
             showToast(`Sesión iniciada como Propietario de ${bloque} - ${apto}`);
         }
@@ -920,20 +1021,24 @@
             const list = document.getElementById('listaZonasAdmin');
             if (!list) return;
             list.innerHTML = '';
-            db.config.zonas.forEach((z, index) => {
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center py-2 text-xs";
-                li.innerHTML = `
-                    <div>
-                        <span class="font-bold text-slate-800">${z.nombre}</span>
-                        <span class="text-slate-500 ml-1">(${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(z.tarifa)})</span>
-                    </div>
-                    <button onclick="eliminarZonaComun(${index})" class="text-rose-500 hover:text-rose-700">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                `;
-                list.appendChild(li);
-            });
+            if (db.config && db.config.zonas && Array.isArray(db.config.zonas)) {
+                db.config.zonas.forEach((z, index) => {
+                    if (!z || !z.nombre) return;
+                    const li = document.createElement('li');
+                    li.className = "flex justify-between items-center py-2 text-xs";
+                    const tarifa = Number(z.tarifa) || 0;
+                    li.innerHTML = `
+                        <div>
+                            <span class="font-bold text-slate-800">${z.nombre}</span>
+                            <span class="text-slate-500 ml-1">(${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(z.tarifa)})</span>
+                        </div>
+                        <button onclick="eliminarZonaComun(${index})" class="text-rose-500 hover:text-rose-700">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    `;
+                    list.appendChild(li);
+                });
+            }
         }
 
         async function agregarZonaComun() {
@@ -972,25 +1077,40 @@
             const selectZona = document.getElementById('zonaComun');
             if (!selectZona) return;
             selectZona.innerHTML = '';
-            db.config.zonas.forEach(z => {
-                const opt = document.createElement('option');
-                opt.value = z.nombre;
-                opt.innerText = z.nombre;
-                selectZona.appendChild(opt);
-            });
+            if (db.config && db.config.zonas && Array.isArray(db.config.zonas)) {
+                db.config.zonas.forEach(z => {
+                    if (!z || !z.nombre) return;
+                    const opt = document.createElement('option');
+                    opt.value = z.nombre;
+                    opt.innerText = z.nombre;
+                    selectZona.appendChild(opt);
+                });
+            }
             actualizarInfoZona();
         }
 
         // --- AUTENTICACIÓN ---
         function checkAuthentication() {
-            const session = sessionStorage.getItem('park_session');
+            const session = SafeSession.getItem('park_session');
             const header = document.querySelector('header');
             const main = document.querySelector('main');
             const nav = document.querySelector('nav');
             const loginSection = document.getElementById('loginSection');
 
-            if (session) {
-                activeUser = JSON.parse(session);
+            // Intento seguro de parsear sesión activa para evitar caídas
+            if (session && session !== 'undefined' && session !== 'null') {
+                try {
+                    activeUser = JSON.parse(session);
+                } catch (e) {
+                    console.warn("Sesión inválida detectada. Limpiando...", e);
+                    SafeSession.removeItem('park_session');
+                    activeUser = null;
+                }
+            } else {
+                activeUser = null;
+            }
+
+            if (activeUser) {
                 if (loginSection) loginSection.classList.add('hidden');
                 if (header) header.classList.remove('hidden');
                 if (main) main.classList.remove('hidden');
@@ -1010,7 +1130,7 @@
                 const setAndDisable = (id, val) => {
                     const el = document.getElementById(id);
                     if (el) {
-                        el.value = val;
+                        el.value = val || '';
                         el.disabled = true;
                     }
                 };
@@ -1037,12 +1157,12 @@
             const passIn = document.getElementById('loginPassword').value.trim();
 
             const user = db.usuarios.find(u => 
-                (u.username && u.username.toLowerCase() === userIn.toLowerCase()) || 
-                (u.email && u.email.toLowerCase() === userIn.toLowerCase())
+                u && ( (u.username && u.username.toLowerCase() === userIn.toLowerCase()) || 
+                       (u.email && u.email.toLowerCase() === userIn.toLowerCase()) )
             );
 
             if (user && user.pass === passIn) {
-                sessionStorage.setItem('park_session', JSON.stringify(user));
+                SafeSession.setItem('park_session', JSON.stringify(user));
                 checkAuthentication(); 
                 showToast(`¡Bienvenido, ${user.name}!`);
                 registrarTurnoCelador('INGRESO_TURNO', user);
@@ -1058,7 +1178,7 @@
             if (activeUser) {
                 registrarTurnoCelador('SALIDA_TURNO', activeUser);
             }
-            sessionStorage.removeItem('park_session');
+            SafeSession.removeItem('park_session');
             activeUser = null;
             checkAuthentication(); 
             showToast('Sesión cerrada correctamente.', 'info');
@@ -1072,10 +1192,9 @@
             const btnSubZonasReservar = document.getElementById('btnSubZonasReservar');
             const btnSubMudRegistrar = document.getElementById('btnSubMudRegistrar');
             
-            // Sub-pestañas de Parqueadero y Paquetes para controlar visibilidad
             const btnSubParqIngresar = document.getElementById('btnSubParqIngresar');
             const btnSubParqActivos = document.getElementById('btnSubParqActivos');
-            const btnSubPaqIngresar = document.getElementById('btnSubPaqIngresar');
+            const btnSubPaqueteriaIngresar = document.getElementById('btnSubPaqueteriaIngresar');
 
             if (!badge || !adminTab) return;
             if (!activeUser) return;
@@ -1087,37 +1206,39 @@
                 adminTab.classList.remove('hidden');
                 btnNavParqueadero.classList.remove('hidden');
                 btnNavPaqueteria.classList.remove('hidden');
+                
                 if (btnSubParqIngresar) btnSubParqIngresar.classList.remove('hidden');
                 if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
-                if (btnSubPaqIngresar) btnSubPaqIngresar.classList.remove('hidden');
-                if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
-                if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
+                if (btnSubPaqueteriaIngresar) btnSubPaqueteriaIngresar.classList.remove('hidden');
                 
-                // Mostrar contenedores de pestañas
-                const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                const tabsParqueadero = document.getElementById('tabParqueaderoNavegacion');
                 if (tabsParqueadero) tabsParqueadero.classList.remove('hidden');
+                
                 const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
                 if (tabsPaqueteria) tabsPaqueteria.classList.remove('hidden');
 
+                if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
+                if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
                 switchPanel('parqueadero');
             } else if (activeUser.rol === 'Celador') {
                 badge.className = "bg-emerald-800 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
                 adminTab.classList.add('hidden');
                 btnNavParqueadero.classList.remove('hidden');
                 btnNavPaqueteria.classList.remove('hidden');
+                
                 if (btnSubParqIngresar) btnSubParqIngresar.classList.remove('hidden');
                 if (btnSubParqActivos) btnSubParqActivos.classList.remove('hidden');
-                if (btnSubPaqIngresar) btnSubPaqIngresar.classList.remove('hidden');
+                if (btnSubPaqueteriaIngresar) btnSubPaqueteriaIngresar.classList.remove('hidden');
                 
-                // Mostrar contenedores de pestañas
-                const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                const tabsParqueadero = document.getElementById('tabParqueaderoNavegacion');
                 if (tabsParqueadero) tabsParqueadero.classList.remove('hidden');
+                
                 const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
                 if (tabsPaqueteria) tabsPaqueteria.classList.remove('hidden');
                 
-                // Restricción Celador: Solo ver Zonas y Mudanzas, no puede crear registros en ellas
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.add('hidden');
                 if (btnSubMudRegistrar) btnSubMudRegistrar.classList.add('hidden');
+                
                 switchPanel('parqueadero');
                 switchSubTab('zonas', 'calendario');
                 switchSubTab('mudanzas', 'porteria');
@@ -1125,12 +1246,11 @@
                 badge.className = "bg-indigo-600 text-white text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider";
                 adminTab.classList.add('hidden');
                 
-                // El propietario SÍ puede ver la sección de Parqueadero para consultar quién está en sitio
                 btnNavParqueadero.classList.remove('hidden');
-                btnNavPaqueteria.classList.remove('hidden'); // SÍ ve paquetes
+                btnNavPaqueteria.classList.remove('hidden'); 
                 
-                // Ocultar barras de pestañas de registro para Propietarios
-                const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                // Ocultar por completo las barras de pestañas de registro para Propietarios
+                const tabsParqueadero = document.getElementById('tabParqueaderoNavegacion');
                 if (tabsParqueadero) tabsParqueadero.classList.add('hidden');
                 const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
                 if (tabsPaqueteria) tabsPaqueteria.classList.add('hidden');
@@ -1138,7 +1258,6 @@
                 if (btnSubZonasReservar) btnSubZonasReservar.classList.remove('hidden');
                 if (btnSubMudRegistrar) btnSubMudRegistrar.classList.remove('hidden');
                 
-                // Redirigir por defecto a Zonas al iniciar sesión
                 switchPanel('zonas');
             }
         }
@@ -1265,7 +1384,7 @@
             const telefono = document.getElementById('telefono').value.trim();
             const firmaB64 = canvasRefs['firmaIngresoCanvas'].canvas.toDataURL();
 
-            const yaAdentro = db.registros.some(r => r.placa === placa && r.estado === 'Dentro');
+            const yaAdentro = db.registros.some(r => r && r.placa === placa && r.estado === 'Dentro');
             if (yaAdentro) {
                 showToast(`El vehículo con placa ${placa} ya registra ingreso activo.`, 'error');
                 return;
@@ -1295,7 +1414,7 @@
         function renderActivos() {
             const listContainer = document.getElementById('listaActivos');
             if (!listContainer) return;
-            const activos = db.registros.filter(r => r.estado === 'Dentro');
+            const activos = db.registros.filter(r => r && r.estado === 'Dentro');
             
             const countEl = document.getElementById('activosCount');
             if (countEl) countEl.innerText = `${activos.length} En Sitio`;
@@ -1312,6 +1431,7 @@
             }
 
             activos.forEach(reg => {
+                if (!reg) return;
                 const badgeColor = reg.tipo === 'Carro' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700';
                 const icon = reg.tipo === 'Carro' ? 'fa-car' : 'fa-motorcycle';
                 const formatTime = new Date(reg.horaIngreso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1362,7 +1482,7 @@
         // --- SALIDAS PARQUEADERO ---
         function abrirSalidaModal(id) {
             activeCheckoutId = id;
-            const reg = db.registros.find(r => r.id === id);
+            const reg = db.registros.find(r => r && r.id === id);
             if (!reg) return;
 
             const entryDate = new Date(reg.horaIngreso);
@@ -1411,7 +1531,7 @@
                 return;
             }
 
-            const reg = db.registros.find(r => r.id === activeCheckoutId);
+            const reg = db.registros.find(r => r && r.id === activeCheckoutId);
             if (!reg) return;
 
             const firmaSalidaB64 = canvasRefs['firmaSalidaCanvas'].canvas.toDataURL();
@@ -1462,8 +1582,9 @@
             const selectZona = document.getElementById('zonaComun');
             if (!selectZona) return;
             const zonaNombre = selectZona.value;
-            const zona = db.config.zonas.find(z => z.nombre === zonaNombre);
-            const tarifa = zona ? zona.tarifa : 0;
+            const zonas = db.config && db.config.zonas ? db.config.zonas : [];
+            const zona = zonas.find(z => z && z.nombre === zonaNombre);
+            const tarifa = zona ? (Number(zona.tarifa) || 0) : 0;
             const formattedTarifa = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(tarifa);
             const infoEl = document.getElementById('infoZonaTarifa');
             if (infoEl) infoEl.innerText = `Costo: ${formattedTarifa} COP`;
@@ -1495,8 +1616,8 @@
                 id: 'RES-' + Date.now(),
                 zona, bloque, apto, nombre, fecha, hora, metodo,
                 comprobante: b64Comprobante,
-                telefono: activeUser.phone,  // Captura para contacto directo
-                email: activeUser.email,      // Captura para contacto directo
+                telefono: activeUser.phone || '',  // Captura para contacto directo
+                email: activeUser.email || '',      // Captura para contacto directo
                 estado: 'Pendiente',
                 timestamp: new Date().toISOString()
             };
@@ -1520,9 +1641,9 @@
 
             if (!activeUser) return;
 
-            // Filtrado: Si es Propietario, solo ve sus propias reservas
+            // Filtrado blindado: Si es Propietario, solo ve sus propias reservas
             const listado = activeUser.rol === 'Propietario' ? 
-                db.reservas.filter(r => r.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && r.apto.toLowerCase() === activeUser.apto.toLowerCase()) : 
+                db.reservas.filter(r => r && r.bloque && r.apto && activeUser.bloque && activeUser.apto && r.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && r.apto.toLowerCase() === activeUser.apto.toLowerCase()) : 
                 db.reservas;
 
             if (listado.length === 0) {
@@ -1536,10 +1657,11 @@
             }
 
             listado.forEach(res => {
+                if (!res) return;
                 const badgeColor = res.estado === 'Aprobado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
                 
                 // Buscar tarifa dinámica
-                const zonaConfig = db.config.zonas.find(z => z.nombre === res.zona);
+                const zonaConfig = db.config.zonas.find(z => z && z.nombre === res.zona);
                 const tarifa = zonaConfig ? zonaConfig.tarifa : 0;
                 const costText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(tarifa);
 
@@ -1598,8 +1720,8 @@
                 id: 'MUD-' + Date.now(),
                 bloque, apto, fecha, hora, empresa, placa, tipo, operarios,
                 pazYSalvo: esPazYSalvo,
-                telefono: activeUser.phone,  // Celador contact
-                email: activeUser.email,      // Celador contact
+                telefono: activeUser.phone || '',  // Celador contact
+                email: activeUser.email || '',      // Celador contact
                 estado: esPazYSalvo ? 'Autorizado' : 'Bloqueado por Cartera',
                 timestamp: new Date().toISOString()
             };
@@ -1623,9 +1745,9 @@
 
             if (!activeUser) return;
 
-            // Filtrado: Si es Propietario, solo ve sus mudanzas
+            // Filtrado blindado: Si es Propietario, solo ve sus mudanzas
             const listado = activeUser.rol === 'Propietario' ? 
-                db.mudanzas.filter(m => m.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && m.apto.toLowerCase() === activeUser.apto.toLowerCase()) : 
+                db.mudanzas.filter(m => m && m.bloque && m.apto && activeUser.bloque && activeUser.apto && m.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && m.apto.toLowerCase() === activeUser.apto.toLowerCase()) : 
                 db.mudanzas;
 
             if (listado.length === 0) {
@@ -1639,6 +1761,7 @@
             }
 
             listado.forEach(mud => {
+                if (!mud) return;
                 const badgeColor = mud.pazYSalvo ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
                 const statusIcon = mud.pazYSalvo ? 'fa-circle-check text-emerald-500' : 'fa-circle-xmark text-rose-500';
 
@@ -1704,7 +1827,8 @@
 
             // Encontrar email y teléfono del propietario de ese apartamento si ya existe
             const prop = db.usuarios.find(u => 
-                u.rol === 'Propietario' && 
+                u && u.rol === 'Propietario' && 
+                u.bloque && u.apto &&
                 u.bloque.toLowerCase() === bloque.toLowerCase() && 
                 u.apto.toLowerCase() === apto.toLowerCase()
             );
@@ -1743,12 +1867,11 @@
 
             if (!activeUser) return;
 
-            // Filtrado: Si es Propietario, solo ve sus propios paquetes
+            // Filtrado blindado: Si es Propietario, solo ve sus propios paquetes
             const pendientes = db.paquetes.filter(p => {
-                const esPendiente = p.estado === 'Pendiente';
-                if (!esPendiente) return false;
+                if (!p || (p.estado !== 'Pending' && p.estado !== 'Pendiente')) return false;
                 if (activeUser.rol === 'Propietario') {
-                    return p.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && p.apto.toLowerCase() === activeUser.apto.toLowerCase();
+                    return p.bloque && p.apto && activeUser.bloque && activeUser.apto && p.bloque.toLowerCase() === activeUser.bloque.toLowerCase() && p.apto.toLowerCase() === activeUser.apto.toLowerCase();
                 }
                 return true;
             });
@@ -1764,6 +1887,7 @@
             }
 
             pendientes.forEach(paq => {
+                if (!paq) return;
                 const formatTime = new Date(paq.fechaRecibido).toLocaleDateString() + ' ' + new Date(paq.fechaRecibido).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-xl border border-slate-150 shadow-sm space-y-3 text-xs";
@@ -1818,7 +1942,7 @@
         // --- SISTEMA DE ENTREGA DE PAQUETES ---
         function abrirEntregaPaqueteModal(id) {
             activeEntregaPaqueteId = id;
-            const paq = db.paquetes.find(p => p.id === id);
+            const paq = db.paquetes.find(p => p && p.id === id);
             if (!paq) return;
 
             document.getElementById('entregaApt').innerText = `Apt ${paq.apto}`;
@@ -1843,7 +1967,7 @@
                 return;
             }
 
-            const paq = db.paquetes.find(p => p.id === activeEntregaPaqueteId);
+            const paq = db.paquetes.find(p => p && p.id === activeEntregaPaqueteId);
             if (!paq) return;
 
             const firmaB64 = canvasRefs['firmaEntregaCanvas'].canvas.toDataURL();
@@ -1872,12 +1996,25 @@
             await pushToCloud('ACTUALIZAR_CONFIG', db.config);
         }
 
+        function guardarWebhooks() {
+            const pushEl = document.getElementById('webhookPushUrl');
+            const pullEl = document.getElementById('webhookPullUrl');
+            if (pushEl && pullEl) {
+                webhookPush = pushEl.value.trim();
+                webhookPull = pullEl.value.trim();
+                localStorage.setItem('webhook_push_url', webhookPush);
+                localStorage.setItem('webhook_pull_url', webhookPull);
+                showToast('URLs de Webhook guardadas.');
+            }
+        }
+
         // --- RENDERIZADO Y CONTROL DE USUARIOS (Celadores/Propietarios/Admin) ---
         function renderCeladoresList() {
             const list = document.getElementById('listaCeladores');
             if (!list) return;
             list.innerHTML = '';
             db.usuarios.forEach(c => {
+                if (!c) return;
                 const isClientAdmin = c.rol === 'Administrador';
                 const isPropietario = c.rol === 'Propietario';
                 const icon = isClientAdmin ? 'fa-user-gear text-amber-500' : (isPropietario ? 'fa-home text-indigo-500' : 'fa-user-shield text-slate-400');
@@ -1895,7 +2032,7 @@
                         <div class="text-xs text-slate-500 mt-1 space-y-0.5">
                             <div><span class="font-medium text-slate-400">Usuario:</span> <span class="font-mono text-slate-700">${c.username}</span></div>
                             <div><span class="font-medium text-slate-400">Contraseña:</span> <span class="font-mono text-slate-600 bg-slate-100 px-1 rounded">${c.pass}</span></div>
-                            ${isPropietario ? `<div><span class="font-medium text-slate-400">Ubicación:</span> Blq ${c.bloque} - Apt ${c.apto}</div>` : ''}
+                            ${isPropietario ? `<div><span class="font-medium text-slate-400">Ubicación:</span> Blq ${c.bloque || ''} - Apt ${c.apto || ''}</div>` : ''}
                         </div>
                     </div>
                     <div class="flex items-center space-x-1.5 flex-shrink-0">
@@ -1933,7 +2070,7 @@
                 return;
             }
 
-            const existe = db.usuarios.some(u => u.username.toLowerCase() === username.toLowerCase());
+            const existe = db.usuarios.some(u => u && u.username && u.username.toLowerCase() === username.toLowerCase());
             if (existe) {
                 showToast('El nombre de usuario ya se encuentra registrado.', 'error');
                 return;
@@ -1984,7 +2121,7 @@
                 return;
             }
 
-            db.usuarios = db.usuarios.filter(u => u.username !== username);
+            db.usuarios = db.usuarios.filter(u => u && u.username !== username);
             saveDb();
             renderCeladoresList();
             showToast('Usuario removido localmente.');
@@ -1998,14 +2135,14 @@
         // --- SISTEMA DE CAMBIO DE CONTRASEÑA ---
         function cambiarPasswordUsuarioPrompt(username) {
             userToChangePassword = username;
-            const u = db.usuarios.find(user => user.username === username);
+            const u = db.usuarios.find(user => user && user.username === username);
             if (!u) return;
 
             const nameEl = document.getElementById('changePassUsername');
             if (nameEl) nameEl.innerText = `${u.name} (${u.username})`;
 
             const passInput = document.getElementById('newUserPasswordVal');
-            if (passInput) passInput.value = u.pass; // Precargar contraseña actual
+            if (passInput) passInput.value = u.pass;
 
             const modal = document.getElementById('changePasswordModal');
             if (modal) modal.classList.remove('hidden');
@@ -2024,14 +2161,13 @@
                 return;
             }
 
-            const uIdx = db.usuarios.findIndex(user => user.username === userToChangePassword);
+            const uIdx = db.usuarios.findIndex(user => user && user.username === userToChangePassword);
             if (uIdx !== -1) {
                 db.usuarios[uIdx].pass = newPassVal;
                 
-                // Si el usuario es el actual logueado, actualizar sesión activa
                 if (activeUser && activeUser.username === userToChangePassword) {
                     activeUser.pass = newPassVal;
-                    sessionStorage.setItem('park_session', JSON.stringify(activeUser));
+                    SafeSession.setItem('park_session', JSON.stringify(activeUser));
                 }
 
                 saveDb();
@@ -2085,14 +2221,11 @@
 
             if (panelName === 'parqueadero') {
                 document.getElementById('panelParqueadero').classList.remove('hidden');
-                // Enrutamiento forzado de sub-pestañas:
-                // Si el usuario es Propietario, lo obligamos a ver directamente "Vehículos Adentro" (activos)
                 if (activeUser && activeUser.rol === 'Propietario') {
                     document.getElementById('subParqIngresar').classList.add('hidden');
                     document.getElementById('subParqActivos').classList.remove('hidden');
                 } else {
-                    // Mostrar u ocultar barra de pestañas para Celadores/Admins
-                    const tabsParqueadero = document.getElementById('tabsParqueaderoContainer');
+                    const tabsParqueadero = document.getElementById('tabParqueaderoNavegacion');
                     if (tabsParqueadero) tabsParqueadero.classList.remove('hidden');
                     switchSubTab('parqueadero', 'ingresar');
                 }
@@ -2106,11 +2239,9 @@
             } else if (panelName === 'paqueteria') {
                 document.getElementById('panelPaqueteria').classList.remove('hidden');
                 if (activeUser && activeUser.rol === 'Propietario') {
-                    // Forzar mostrar subPanel de Inventario directo
                     document.getElementById('subPaqueteriaIngresar').classList.add('hidden');
                     document.getElementById('subPaqueteriaInventario').classList.remove('hidden');
                 } else {
-                    // Mostrar u ocultar barra de pestañas para Celadores/Admins
                     const tabsPaqueteria = document.getElementById('tabsPaqueteriaContainer');
                     if (tabsPaqueteria) tabsPaqueteria.classList.remove('hidden');
                     switchSubTab('paqueteria', 'ingresar');
@@ -2179,8 +2310,8 @@
             } else if (modulo === 'paqueteria') {
                 const subIngresar = document.getElementById('subPaqueteriaIngresar');
                 const subInventario = document.getElementById('subPaqueteriaInventario');
-                const btnIngresar = document.getElementById('btnSubPaqIngresar');
-                const btnInventario = document.getElementById('btnSubPaqInventario');
+                const btnIngresar = document.getElementById('btnSubPaqueteriaIngresar');
+                const btnInventario = document.getElementById('btnSubPaqueteriaInventario');
 
                 subIngresar.classList.add('hidden');
                 subInventario.classList.add('hidden');
@@ -2257,6 +2388,16 @@
             };
         }
 
+        // --- ENCODING UTILITY ---
+        function encodeFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         function clearCanvas(canvasId) {
             const ref = canvasRefs[canvasId];
             if (ref) {
@@ -2275,15 +2416,6 @@
                 motoLabel.className = "flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold";
                 carLabel.className = "flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition border-slate-200 text-slate-600";
             }
-        }
-
-        function encodeFileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
         }
     </script>
 </body>
